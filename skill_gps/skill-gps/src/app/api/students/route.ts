@@ -1,41 +1,61 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+// Path to the students database (in the backend folder alongside this project)
+const DB_PATH = path.join(process.cwd(), '..', 'backend', 'students.json');
 
-// GET /api/students - get all students (can filter by college)
+function readStudents() {
+    const raw = fs.readFileSync(DB_PATH, 'utf-8');
+    return JSON.parse(raw);
+}
+
+function writeStudents(students: unknown[]) {
+    fs.writeFileSync(DB_PATH, JSON.stringify(students, null, 2));
+}
+
+// GET /api/students?college=...
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const college = searchParams.get('college');
-        const urlObj = new URL(`${BACKEND_URL}/api/students`);
-        if (college) {
-            urlObj.searchParams.set('college', college);
+        let students = readStudents();
+        if (college && college !== 'admin') {
+            students = students.filter((s: { college: string }) =>
+                s.college.toLowerCase().includes(college.toLowerCase())
+            );
         }
-
-        const response = await fetch(urlObj.toString(), {
-            signal: AbortSignal.timeout(10000)
-        });
-        if (!response.ok) throw new Error('Backend error');
-        const data = await response.json();
-        return NextResponse.json(data);
+        return NextResponse.json(students);
     } catch {
         return NextResponse.json({ error: 'Failed to fetch students' }, { status: 500 });
     }
 }
 
-// POST /api/students - add new student (admin)
+// POST /api/students — add new student (admin)
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const response = await fetch(`${BACKEND_URL}/api/students`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-            signal: AbortSignal.timeout(10000)
-        });
-        if (!response.ok) throw new Error('Backend error');
-        const data = await response.json();
-        return NextResponse.json(data, { status: 201 });
+        const students = readStudents();
+        const newStudent = {
+            id: `STU${String(students.length + 1).padStart(3, '0')}`,
+            ...body,
+            careerProbability: body.careerProbability || 50,
+            joinedDate: new Date().toISOString().split('T')[0],
+            attendance: body.attendance || 80,
+            leetcodeRank: body.leetcodeRank || 5000,
+            leetcodeStreak: 0,
+            skillrackStreak: 0,
+            githubStreak: 0,
+            totalXP: 100,
+            level: 1,
+            badges: [],
+            skillGaps: body.skillGaps || [],
+            semesterGoals: body.semesterGoals || [],
+            recentActivity: [],
+        };
+        students.push(newStudent);
+        writeStudents(students);
+        return NextResponse.json(newStudent, { status: 201 });
     } catch {
         return NextResponse.json({ error: 'Failed to add student' }, { status: 500 });
     }

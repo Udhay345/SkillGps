@@ -1,69 +1,49 @@
 import { NextResponse } from 'next/server';
+import { callGroq } from '@/lib/gemini';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+const SYSTEM_PROMPT = `You are an expert AI Resume Optimizer and ATS specialist for fresh engineering graduates.
 
-const SYSTEM_PROMPT = `You are an AI Resume Optimizer. Analyze the provided resume text and provide a score (0-100) and specific suggestions for improvement.
-Focus on:
-- Technical keywords for the target role
-- Action verbs
-- Quantifiable achievements
-- Clear formatting
-
-RESPONSE FORMAT:
-Provide the response ONLY as a valid JSON object with this exact structure:
+Return a valid JSON object with EXACTLY this structure (no extra text, no markdown):
 {
   "overall": 85,
   "atsScore": 80,
   "breakdown": [
     { "category": "Technical Skills", "score": 90 },
-    { "category": "Experience", "score": 75 },
+    { "category": "Experience & Projects", "score": 75 },
     { "category": "Education", "score": 95 },
-    { "category": "Formatting", "score": 85 }
+    { "category": "Formatting & Clarity", "score": 85 },
+    { "category": "Keywords & ATS", "score": 80 }
   ],
   "suggestions": [
-    "Add more quantifiable results (e.g., 'Increased efficiency by 20%')",
-    "Include keywords like 'PyTorch', 'Next.js', 'System Design'",
-    "Use a more modern resume template"
+    "Specific actionable suggestion 1",
+    "Specific actionable suggestion 2",
+    "Specific actionable suggestion 3"
   ],
-  "rewrittenSummary": "Highly skilled AI engineer with experience in..."
-}
-
-Return ONLY the JSON object.`;
+  "missingKeywords": ["keyword1", "keyword2", "keyword3"],
+  "rewrittenSummary": "A stronger, ATS-optimized professional summary paragraph"
+}`;
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { resumeText } = body;
+        const { resumeText, targetRole } = body;
 
-        const response = await fetch(`${BACKEND_URL}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                messages: [{ role: 'user', content: `Analyze this resume: ${resumeText}` }],
-                systemPrompt: SYSTEM_PROMPT,
-                model: 'mistralai/Mistral-7B-Instruct-v0.3'
-            }),
-            signal: AbortSignal.timeout(45000)
-        });
-
-        if (!response.ok) return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
-
-        const data = await response.json();
-        const rawReply = data.reply || '';
-
-        try {
-            const start = rawReply.indexOf('{');
-            const end = rawReply.lastIndexOf('}');
-            if (start !== -1 && end !== -1) {
-                return NextResponse.json(JSON.parse(rawReply.substring(start, end + 1)));
-            }
-        } catch {
-            return NextResponse.json({ rawReply }, { status: 200 });
+        if (!resumeText || resumeText.trim().length < 50) {
+            return NextResponse.json({ error: 'Please provide a resume with at least 50 characters.' }, { status: 400 });
         }
-        return NextResponse.json({ error: 'Invalid response from AI' }, { status: 500 });
 
-    } catch (error) {
-        console.error('Resume optimizer error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        const userMessage = `Analyze this resume for the role of "${targetRole || 'Software Engineer'}":\n\n${resumeText}`;
+
+        const reply = await callGroq(SYSTEM_PROMPT, [{ role: 'user', content: userMessage }], true);
+        const parsed = JSON.parse(reply);
+        return NextResponse.json(parsed);
+
+    } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Resume optimizer error:', msg);
+        if (msg.startsWith('RATE_LIMIT')) {
+            return NextResponse.json({ error: '⏳ AI is busy. Please wait a moment and try again.' }, { status: 429 });
+        }
+        return NextResponse.json({ error: 'Failed to analyze resume. Please try again.' }, { status: 500 });
     }
 }

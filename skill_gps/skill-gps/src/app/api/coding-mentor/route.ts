@@ -1,53 +1,37 @@
 import { NextResponse } from 'next/server';
+import { callGroq } from '@/lib/gemini';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+const SYSTEM_PROMPT = `You are an expert AI Coding Mentor. Analyze the provided code or answer the coding question.
 
-const SYSTEM_PROMPT = `You are an AI Coding Mentor. Provide code reviews, explain concepts, and suggest optimizations.
-
-RESPONSE FORMAT:
-Provide the response ONLY as a valid JSON object with this exact structure:
+Return a valid JSON object with EXACTLY this structure (no extra text, no markdown):
 {
-  "feedback": "Your code is solid but...",
-  "optimization": "Consider using a Map instead of an object for better performance...",
-  "suggestedExercise": "Try implementing a Binary Search Tree."
-}
-
-Return ONLY the JSON object.`;
+  "feedback": "Detailed feedback about the code quality, logic, and correctness",
+  "optimization": "A specific optimization suggestion with a brief code example if helpful",
+  "timeComplexity": "e.g. O(n log n)",
+  "spaceComplexity": "e.g. O(n)",
+  "suggestedExercise": "Name of a related problem to practice next",
+  "correctedCode": "The improved or corrected version of the code (if applicable, else empty string)"
+}`;
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { code, language } = body;
+        const { code, language, question } = body;
 
-        const response = await fetch(`${BACKEND_URL}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                messages: [{ role: 'user', content: `Language: ${language}. Code: ${code}` }],
-                systemPrompt: SYSTEM_PROMPT,
-                model: 'codellama/CodeLlama-34b-Instruct-hf'
-            }),
-            signal: AbortSignal.timeout(60000)
-        });
+        const userMessage = question
+            ? `Coding question: ${question}`
+            : `Please review this ${language || 'code'}:\n\n\`\`\`${language || ''}\n${code}\n\`\`\``;
 
-        if (!response.ok) return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
+        const reply = await callGroq(SYSTEM_PROMPT, [{ role: 'user', content: userMessage }], true);
+        const parsed = JSON.parse(reply);
+        return NextResponse.json(parsed);
 
-        const data = await response.json();
-        const rawReply = data.reply || '';
-
-        try {
-            const start = rawReply.indexOf('{');
-            const end = rawReply.lastIndexOf('}');
-            if (start !== -1 && end !== -1) {
-                return NextResponse.json(JSON.parse(rawReply.substring(start, end + 1)));
-            }
-        } catch {
-            return NextResponse.json({ rawReply }, { status: 200 });
+    } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Coding mentor error:', msg);
+        if (msg.startsWith('RATE_LIMIT')) {
+            return NextResponse.json({ error: '⏳ AI is busy. Please wait a moment and try again.' }, { status: 429 });
         }
-        return NextResponse.json({ error: 'Invalid response from AI' }, { status: 500 });
-
-    } catch (error) {
-        console.error('Coding mentor error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to analyze code. Please try again.' }, { status: 500 });
     }
 }

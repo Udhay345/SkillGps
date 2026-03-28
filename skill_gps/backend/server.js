@@ -6,11 +6,63 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // ===== MIDDLEWARE =====
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001'], credentials: true }));
 app.use(express.json());
+
+// ===== GEMINI HELPER =====
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// gemini-2.0-flash is the current free available model (1.5-flash and 1.5-pro are deprecated)
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+/**
+ * Call Gemini 2.0 Flash API.
+ * @param {string} systemPrompt - Instruction for the model
+ * @param {Array}  messages     - [{role:'user'|'assistant', content:'...'}]
+ * @param {boolean} jsonMode    - Enable JSON output mode
+ */
+async function callGemini(systemPrompt, messages, _unused = false, jsonMode = false) {
+    // Convert messages: Gemini uses 'model' not 'assistant'
+    const rawContents = messages.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content || '' }]
+    }));
+
+    // Gemini requires strictly alternating user/model turns.
+    // Merge consecutive same-role messages into one.
+    const contents = [];
+    for (const turn of rawContents) {
+        if (contents.length > 0 && contents[contents.length - 1].role === turn.role) {
+            contents[contents.length - 1].parts[0].text += '\n' + turn.parts[0].text;
+        } else {
+            contents.push(turn);
+        }
+    }
+    // Must end with a user message
+    if (!contents.length || contents[contents.length - 1].role !== 'user') {
+        throw new Error('Last message must be from user');
+    }
+
+    const requestBody = {
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents,
+        generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+            ...(jsonMode && { responseMimeType: 'application/json' })
+        }
+    };
+
+    const response = await axios.post(GEMINI_URL, requestBody, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 60000
+    });
+
+    const reply = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    return reply;
+}
 
 // ===== DB HELPERS =====
 const DB_PATH = path.join(__dirname, 'students.json');
@@ -27,7 +79,6 @@ function writeStudents(students) {
 // ===== ADMIN AUTH (Per College) =====
 app.post('/api/admin/login', (req, res) => {
     const { username, password } = req.body;
-    // We treat the "username" field as the actual "college" name
     if (username && password === '12345678') {
         return res.json({ success: true, token: 'ADMIN_TOKEN_SKILLGPS', role: 'admin', college: username.trim() });
     }
@@ -40,9 +91,7 @@ app.post('/api/admin/login', (req, res) => {
 app.get('/api/students', (req, res) => {
     const { college } = req.query;
     let students = readStudents();
-
     if (college && college !== 'admin') {
-        // Find by partial match of college name
         students = students.filter(s => s.college.toLowerCase().includes(college.toLowerCase()));
     }
     res.json(students);
@@ -63,7 +112,6 @@ app.get('/api/students/lookup/email', (req, res) => {
     const students = readStudents();
     const student = students.find(s => s.email.toLowerCase() === email.toString().toLowerCase());
     if (!student) return res.status(404).json({ message: 'Student not found' });
-    // Return only safe fields for onboarding verification
     res.json({
         id: student.id,
         name: student.name,
@@ -81,7 +129,6 @@ app.post('/api/students', (req, res) => {
     const newStudent = {
         id: `STU${String(students.length + 1).padStart(3, '0')}`,
         ...req.body,
-        // defaults
         careerProbability: req.body.careerProbability || 50,
         joinedDate: new Date().toISOString().split('T')[0],
         attendance: req.body.attendance || 80,
@@ -121,31 +168,38 @@ app.delete('/api/students/:id', (req, res) => {
     res.json({ success: true });
 });
 
-// ===== AI CHAT ROUTE (Gemini) =====
+// ===== AI CHAT ROUTE (Gemini Flash) =====
 app.post('/api/chat', async (req, res) => {
-    const { messages, studentId, requestingStudentId } = req.body;
+    const { messages, studentId, requestingStudentId, systemPrompt: customSystemPrompt } = req.body;
+
+    // If a custom system prompt is provided (from non-chat routes), use it directly
+    if (customSystemPrompt) {
+        try {
+            const reply = await callGemini(customSystemPrompt, messages, false, false);
+            return res.json({ reply });
+        } catch (error) {
+            console.error('Gemini error (custom prompt):', error.message);
+            return res.status(500).json({ reply: 'AI service temporarily unavailable.' });
+        }
+    }
 
     const students = readStudents();
     const currentStudent = students.find(s => s.id === requestingStudentId) || students[0];
     const targetStudent = students.find(s => s.id === studentId);
 
-    // Security check: if asking about a different student's personal data
+    // Privacy check
     if (studentId && studentId !== requestingStudentId && targetStudent) {
         const lastMsg = messages[messages.length - 1]?.content?.toLowerCase() || '';
         const personalKeywords = ['cgpa', 'gpa', 'internship', 'project', 'badge', 'rank', 'streak', 'goal', 'grade', 'attendance', 'personal', 'his ', 'her ', 'their '];
-        const asksPersonal = personalKeywords.some(k => lastMsg.includes(k));
-        if (asksPersonal) {
-            return res.json({
-                reply: "⚠️ Cannot provide other users' personal info due to safety reasons."
-            });
+        if (personalKeywords.some(k => lastMsg.includes(k))) {
+            return res.json({ reply: "⚠️ Cannot provide other users' personal info due to safety reasons." });
         }
     }
 
-    // Build context for the current logged-in student
     const student = currentStudent;
-    const systemPrompt = `You are a friendly, conversational AI chatbot acting as the Skill GPS Career Mentor. You are chatting one-on-one with a student. You have complete knowledge of their academic profile. Your tone should be natural, helpful, engaging, and human-like (like ChatGPT or Gemini). Do NOT just dump data or output long essays. Have a dynamic back-and-forth conversation.
+    const systemPrompt = `You are a friendly, conversational AI chatbot acting as the Skill GPS Career Mentor. You are chatting one-on-one with a student. You have complete knowledge of their academic profile. Your tone should be natural, helpful, engaging, and human-like. Keep responses short and conversational (1-2 short paragraphs). Use emojis occasionally. Be motivating, specific, and actionable.
 
-=== STUDENT PROFILE (LOGGED IN USER) ===
+=== STUDENT PROFILE ===
 Name: ${student.name}
 College: ${student.college}
 Department: ${student.department}
@@ -162,78 +216,253 @@ XP Points: ${student.totalXP} | Level: ${student.level}
 Projects Completed: ${student.projectsCompleted}
 Internships: ${student.internships}
 
-=== SKILL GAPS TO ADDRESS ===
-${student.skillGaps.map(g => `- ${g.skill}: ${g.score}%`).join('\n')}
+=== SKILL GAPS ===
+${(student.skillGaps || []).map(g => `- ${g.skill}: ${g.score}%`).join('\n')}
 
-=== CURRENT SEMESTER GOALS ===
-${student.semesterGoals.map(g => `- [${g.done ? '✓' : ' '}] ${g.text}`).join('\n')}
+=== SEMESTER GOALS ===
+${(student.semesterGoals || []).map(g => `- [${g.done ? '✓' : ' '}] ${g.text}`).join('\n')}
 
-=== EARNED BADGES ===
-${student.badges.map(b => `- ${b.title} (${b.date}): ${b.desc}`).join('\n')}
-
-IMPORTANT PRIVACY RULE: If the user asks about another specific student's personal details (like their CGPA, projects, internships, rank, grades, etc.), respond ONLY with: "⚠️ Cannot provide other users' personal info due to safety reasons."
-
-Always refer to the student by their first name. Converse naturally like an AI chatbot. Keep responses short and conversational (1-2 short paragraphs), using emojis occasionally. Ask follow-up questions to keep the chat engaging. Be motivating, specific, and actionable. When relevant, organically weave in their exact data (like CGPA or skill gaps).`;
+IMPORTANT PRIVACY RULE: If asked about another student's personal details, respond ONLY with: "⚠️ Cannot provide other users' personal info due to safety reasons."`;
 
     try {
-        const HF_API_TOKEN = process.env.HF_API_TOKEN;
-        const targetModel = req.body.model || 'mistralai/Mistral-7B-Instruct-v0.3';
-
-        const hfMessages = [
-            { role: 'system', content: systemPrompt },
-            ...messages.map(m => ({
-                role: m.role === 'assistant' ? 'assistant' : 'user',
-                content: m.content || ''
-            }))
-        ];
-
-        const response = await axios.post(
-            `https://api-inference.huggingface.co/models/${targetModel}/v1/chat/completions`,
-            {
-                model: targetModel,
-                messages: hfMessages,
-                max_tokens: 1024,
-                temperature: 0.6
-            },
-            {
-                headers: { 
-                    'Authorization': `Bearer ${HF_API_TOKEN}`,
-                    'Content-Type': 'application/json' 
-                },
-                timeout: 60000
-            }
-        );
-
-        const reply = response.data?.choices?.[0]?.message?.content || 'I could not generate a response.';
+        const reply = await callGemini(systemPrompt, messages, false, false);
         res.json({ reply });
-
     } catch (error) {
-        console.error('AI Chat error:', error.message || error);
-        // Provide intelligent fallback
+        console.error('Gemini chat error:', error.message);
+        // Intelligent fallback
+        const student = currentStudent;
         const lastMsg = messages[messages.length - 1]?.content?.toLowerCase() || '';
-        let fallbackReply = '';
-
+        let fallbackReply = `Hey ${student.name.split(' ')[0]}! I'm your Skill GPS AI mentor. I'm having a moment of trouble connecting, but I'm here for you! Your career match for ${student.careerTarget} is ${student.careerProbability}%. Keep pushing! 💪`;
         if (lastMsg.includes('cgpa') || lastMsg.includes('gpa')) {
-            fallbackReply = `Hey ${student.name.split(' ')[0]}! Your current CGPA is ${student.cgpa}. ${student.cgpa >= 8.5 ? "That's excellent! Keep it up!" : student.cgpa >= 7.5 ? "That's good, but there's room to push it above 8.5 for competitive placements." : "Focus on improving your academic scores — aim for at least 7.5+ this semester."}`;
-        } else if (lastMsg.includes('skill') || lastMsg.includes('work on') || lastMsg.includes('improve')) {
-            fallbackReply = `Based on your profile, ${student.name.split(' ')[0]}, here are your key areas to focus on:\n\n${student.skillGaps.map(g => `• **${g.skill}** — currently at ${g.score}%, needs improvement`).join('\n')}\n\nI recommend starting with the skill that has the lowest score first for maximum impact on your career probability!`;
-        } else if (lastMsg.includes('project')) {
-            fallbackReply = `${student.name.split(' ')[0]}, you've completed ${student.projectsCompleted} projects so far. ${student.projectsCompleted < 3 ? "Try building 2-3 more projects aligned with your " + student.careerTarget + " goal." : "Great work on your projects! Consider contributing to open source to boost visibility."}`;
-        } else {
-            fallbackReply = `Hey ${student.name.split(' ')[0]}! I'm your Skill GPS AI mentor. You're targeting ${student.careerTarget} with a ${student.careerProbability}% career match. Focus on improving your skill gaps — especially ${student.skillGaps[0]?.skill || 'system design'} which is at ${student.skillGaps[0]?.score || 0}%. Keep your LeetCode streak going (currently ${student.leetcodeStreak} days) and you'll see your match percentage rise!`;
+            fallbackReply = `Hey ${student.name.split(' ')[0]}! Your current CGPA is ${student.cgpa}. ${student.cgpa >= 8.5 ? "That's excellent! Keep it up! 🌟" : "There's room to push higher — aim for 8.5+ for competitive placements!"}`;
         }
-
         res.json({ reply: fallbackReply });
+    }
+});
+
+// ===== APTITUDE TRAINER (Gemini Flash + JSON Mode) =====
+app.post('/api/aptitude', async (req, res) => {
+    const { topic, difficulty, score } = req.body;
+
+    const systemPrompt = `You are an AI Aptitude Trainer for IT placement exams. Generate ONE high-quality multiple-choice question.
+
+Return a valid JSON object with EXACTLY this structure:
+{
+  "topic": "Topic Name",
+  "difficulty": "Easy/Medium/Hard",
+  "question": "The question text",
+  "options": { "A": "...", "B": "...", "C": "...", "D": "..." },
+  "correctAnswer": "A",
+  "explanation": "Step-by-step explanation",
+  "conceptTip": "A short trick or shortcut",
+  "nextTopic": "Recommended next topic"
+}`;
+
+    const userMessage = `Generate a question for Topic: ${topic || 'Any'}, Difficulty: ${difficulty || 'Medium'}, Student Previous Score: ${score || 'N/A'}`;
+
+    try {
+        const reply = await callGemini(systemPrompt, [{ role: 'user', content: userMessage }], false, true);
+        const parsed = JSON.parse(reply);
+        res.json(parsed);
+    } catch (error) {
+        const detail = error.response?.data || error.message;
+        console.error('Aptitude trainer error:', JSON.stringify(detail));
+        res.status(500).json({ error: 'Failed to generate question. Please try again.' });
+    }
+});
+
+// ===== CODING MENTOR (Gemini Pro + JSON Mode) =====
+app.post('/api/coding-mentor', async (req, res) => {
+    const { code, language, question } = req.body;
+
+    const systemPrompt = `You are an expert AI Coding Mentor. Analyze the code or answer the coding question.
+
+Return a valid JSON object with EXACTLY this structure:
+{
+  "feedback": "Detailed feedback about the code quality and logic",
+  "optimization": "Specific optimization suggestion with example",
+  "timeComplexity": "e.g. O(n log n)",
+  "spaceComplexity": "e.g. O(n)",
+  "suggestedExercise": "Name of a related problem to practice",
+  "correctedCode": "The improved/corrected version of the code (if applicable)"
+}`;
+
+    const userMessage = question
+        ? `Question: ${question}`
+        : `Language: ${language || 'Unknown'}\nCode:\n${code}`;
+
+    try {
+        const reply = await callGemini(systemPrompt, [{ role: 'user', content: userMessage }], true, true);
+        const parsed = JSON.parse(reply);
+        res.json(parsed);
+    } catch (error) {
+        console.error('Coding mentor error:', error.message);
+        res.status(500).json({ error: 'Failed to analyze code. Please try again.' });
+    }
+});
+
+// ===== RESUME OPTIMIZER (Gemini Pro + JSON Mode) =====
+app.post('/api/resume-optimizer', async (req, res) => {
+    const { resumeText, targetRole } = req.body;
+
+    const systemPrompt = `You are an expert AI Resume Optimizer and ATS (Applicant Tracking System) specialist.
+
+Return a valid JSON object with EXACTLY this structure:
+{
+  "overall": 85,
+  "atsScore": 80,
+  "breakdown": [
+    { "category": "Technical Skills", "score": 90 },
+    { "category": "Experience", "score": 75 },
+    { "category": "Education", "score": 95 },
+    { "category": "Projects", "score": 80 },
+    { "category": "Formatting", "score": 85 }
+  ],
+  "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"],
+  "missingKeywords": ["keyword1", "keyword2"],
+  "rewrittenSummary": "A stronger, ATS-optimized professional summary"
+}`;
+
+    const userMessage = `Analyze this resume for the role of ${targetRole || 'Software Engineer'}:\n\n${resumeText}`;
+
+    try {
+        const reply = await callGemini(systemPrompt, [{ role: 'user', content: userMessage }], true, true);
+        const parsed = JSON.parse(reply);
+        res.json(parsed);
+    } catch (error) {
+        console.error('Resume optimizer error:', error.message);
+        res.status(500).json({ error: 'Failed to analyze resume. Please try again.' });
+    }
+});
+
+// ===== CAREER ROADMAP (Gemini Flash + JSON Mode) =====
+app.post('/api/career-roadmap', async (req, res) => {
+    const { currentSkills, targetRole, studentId } = req.body;
+
+    const systemPrompt = `You are an AI Career Roadmap Generator. Create a personalized step-by-step learning roadmap.
+
+Return a valid JSON object with EXACTLY this structure:
+{
+  "targetRole": "Full Stack Engineer",
+  "nodes": [
+    { "id": 1, "title": "Foundation", "description": "HTML, CSS, JS basics", "status": "completed", "xp": 100, "resources": ["freeCodeCamp", "MDN Docs"] },
+    { "id": 2, "title": "React Mastery", "description": "Hooks, Context, Next.js", "status": "active", "xp": 300, "resources": ["React Docs", "Next.js Docs"] },
+    { "id": 3, "title": "Backend Essentials", "description": "Node, Express, Databases", "status": "locked", "xp": 400, "resources": ["Node.js Docs", "MongoDB University"] }
+  ],
+  "estimatedTime": "6 Months",
+  "marketDemand": "High",
+  "avgSalary": "₹8-15 LPA"
+}`;
+
+    const userMessage = `Current Skills: ${currentSkills}. Target Role: ${targetRole}.`;
+
+    try {
+        const reply = await callGemini(systemPrompt, [{ role: 'user', content: userMessage }], false, true);
+        const parsed = JSON.parse(reply);
+        res.json(parsed);
+    } catch (error) {
+        console.error('Roadmap generator error:', error.message);
+        res.status(500).json({ error: 'Failed to generate roadmap. Please try again.' });
+    }
+});
+
+// ===== COMMUNICATION TRAINER (Gemini Flash + JSON Mode) =====
+app.post('/api/communication-trainer', async (req, res) => {
+    const { sentence } = req.body;
+    if (!sentence || sentence.trim() === '') {
+        return res.status(400).json({ error: 'No sentence provided' });
+    }
+
+    const systemPrompt = `You are an AI Real-Time Communication Trainer for students preparing for placements.
+
+Return a valid JSON object with EXACTLY this structure:
+{
+  "correctSentence": "Grammatically correct version",
+  "grammarMistakes": [{ "error": "mistake description", "explanation": "simple explanation" }],
+  "vocabularyImprovement": [{ "original": "word used", "better": "professional word", "reason": "why" }],
+  "fluencyFeedback": "How natural it sounds",
+  "pronunciationTips": [{ "word": "word", "tip": "how to pronounce" }],
+  "scores": { "grammar": 75, "fluency": 70, "vocabulary": 65, "pronunciation": 80, "confidence": 72 },
+  "professionalVersion": "Interview-ready version of the sentence",
+  "practiceSuggestion": "One short speaking exercise",
+  "conversationalResponse": "A natural, supportive response",
+  "followUpQuestion": "A question to keep the student speaking"
+}`;
+
+    try {
+        const reply = await callGemini(systemPrompt, [{ role: 'user', content: `Input Sentence: "${sentence}"` }], false, true);
+        const parsed = JSON.parse(reply);
+        res.json(parsed);
+    } catch (error) {
+        console.error('Communication trainer error:', error.message);
+        res.status(500).json({ error: 'Failed to analyze sentence. Please try again.' });
+    }
+});
+
+// ===== MENTOR GUIDE (Gemini Flash) =====
+app.post('/api/mentor-guide', async (req, res) => {
+    const { studentProfile, question } = req.body;
+
+    const systemPrompt = `You are a senior career mentor at a top placement consultancy. Give practical, motivating career advice to students. Keep responses concise (3-4 sentences max), actionable, and encouraging.`;
+
+    const userMessage = `Student Profile: ${JSON.stringify(studentProfile || {})}. Question: ${question}`;
+
+    try {
+        const reply = await callGemini(systemPrompt, [{ role: 'user', content: userMessage }], false, false);
+        res.json({ reply });
+    } catch (error) {
+        console.error('Mentor guide error:', error.message);
+        res.status(500).json({ reply: 'Unable to connect to mentor AI. Please try again.' });
+    }
+});
+
+// ===== INSIGHTS (Gemini Flash + JSON Mode) =====
+app.post('/api/insights', async (req, res) => {
+    const { studentId } = req.body;
+    const students = readStudents();
+    const student = students.find(s => s.id === studentId) || students[0];
+
+    const systemPrompt = `You are an AI academic insights engine. Analyze the student's data and return actionable insights.
+
+Return a valid JSON object with EXACTLY this structure:
+{
+  "summary": "2-sentence overview of the student's current standing",
+  "strengths": ["strength 1", "strength 2", "strength 3"],
+  "weaknesses": ["weakness 1", "weakness 2"],
+  "actionItems": [
+    { "priority": "High", "action": "Specific action to take", "impact": "Expected outcome" }
+  ],
+  "weeklyGoal": "One specific goal to achieve this week",
+  "motivationalNote": "A personalized motivational message"
+}`;
+
+    const userMessage = `Student Data: ${JSON.stringify(student)}`;
+
+    try {
+        const reply = await callGemini(systemPrompt, [{ role: 'user', content: userMessage }], false, true);
+        const parsed = JSON.parse(reply);
+        res.json(parsed);
+    } catch (error) {
+        console.error('Insights error:', error.message);
+        res.status(500).json({ error: 'Failed to generate insights.' });
     }
 });
 
 // ===== HEALTH CHECK =====
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        ai: 'Google Gemini',
+        model_chat: 'gemini-1.5-flash',
+        model_pro: 'gemini-1.5-pro',
+        gemini_key_set: !!GEMINI_API_KEY
+    });
 });
 
 app.listen(PORT, () => {
     console.log(`✅ Skill GPS Backend running on http://localhost:${PORT}`);
     console.log(`📦 Student DB: ${DB_PATH}`);
-    console.log(`🔑 Hugging Face Token: ${process.env.HF_API_TOKEN ? 'SET' : 'NOT SET'}`);
+    console.log(`🤖 AI Provider: Google Gemini`);
+    console.log(`🔑 Gemini API Key: ${GEMINI_API_KEY ? 'SET ✅' : 'NOT SET ❌'}`);
 });

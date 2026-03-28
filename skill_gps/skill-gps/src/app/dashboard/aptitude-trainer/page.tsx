@@ -65,16 +65,23 @@ export default function AptitudeTrainerPage() {
                 }),
             });
 
-            if (!res.ok) throw new Error("Failed to fetch question");
             const data = await res.json();
-            
-            if (data.error) throw new Error(data.error);
-            if (data.rawReply) throw new Error("AI returned invalid JSON");
+
+            if (res.status === 429) {
+                setError("⏳ AI is too busy right now. Please wait 30 seconds and try again.");
+                return;
+            }
+            if (!res.ok || data.error) {
+                throw new Error(data.error || "Failed to fetch question");
+            }
 
             setQuestion(data);
             setView("quiz");
-        } catch (err: any) {
-            setError(err.message || "An error occurred");
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : "An error occurred";
+            setError(msg.includes("429") || msg.includes("busy") 
+                ? "⏳ AI is too busy right now. Please wait 30 seconds and try again."
+                : msg);
         } finally {
             setIsLoading(false);
         }

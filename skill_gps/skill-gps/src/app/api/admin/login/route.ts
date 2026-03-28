@@ -1,20 +1,22 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
-
 // POST /api/admin/login
+// Simple auth: any college name + password '12345678'
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
-        const response = await fetch(`${BACKEND_URL}/api/admin/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-            signal: AbortSignal.timeout(10000)
-        });
-        const data = await response.json();
-        if (!response.ok) return NextResponse.json(data, { status: 401 });
-        return NextResponse.json(data);
+        const { username, password } = await req.json();
+        if (username && password === '12345678') {
+            return NextResponse.json({
+                success: true,
+                token: 'ADMIN_TOKEN_SKILLGPS',
+                role: 'admin',
+                college: username.trim(),
+            });
+        }
+        return NextResponse.json(
+            { success: false, message: 'Invalid credentials. Password should be 12345678' },
+            { status: 401 }
+        );
     } catch {
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }

@@ -1,36 +1,44 @@
 import { NextResponse } from 'next/server';
+import { callGroq } from '@/lib/gemini';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+const SYSTEM_PROMPT = `You are a friendly, conversational AI chatbot acting as the Skill GPS Career Mentor. You chat one-on-one with a student and have full context of their academic profile. Be natural, helpful, and human-like. Keep responses to 1-2 short paragraphs. Use emojis occasionally. Be motivating, specific, and actionable.
+
+IMPORTANT PRIVACY RULE: If asked about another student's personal details (CGPA, projects, grades, etc.), respond ONLY with: "⚠️ Cannot provide other users' personal info due to safety reasons."`;
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, studentId, requestingStudentId } = body;
+        const { messages, studentProfile } = body;
 
-        // Forward the request to our Node.js backend
-        const response = await fetch(`${BACKEND_URL}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages, studentId, requestingStudentId }),
-            signal: AbortSignal.timeout(65000)
-        });
+        const systemPrompt = studentProfile
+            ? `${SYSTEM_PROMPT}
 
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            return NextResponse.json(
-                { reply: errData.reply || 'AI service is temporarily unavailable. Please try again.' },
-                { status: 200 }
-            );
+=== STUDENT PROFILE ===
+Name: ${studentProfile.name}
+College: ${studentProfile.college}
+Department: ${studentProfile.department}
+Year: ${studentProfile.year}, Semester: ${studentProfile.semester}
+CGPA: ${studentProfile.cgpa} | Attendance: ${studentProfile.attendance}%
+Career Target: ${studentProfile.careerTarget}
+Career Match Probability: ${studentProfile.careerProbability}%
+LeetCode Rank: #${studentProfile.leetcodeRank} | Streak: ${studentProfile.leetcodeStreak} days
+GitHub: @${studentProfile.githubUsername} | Streak: ${studentProfile.githubStreak} days
+XP Points: ${studentProfile.totalXP} | Level: ${studentProfile.level}
+Projects Completed: ${studentProfile.projectsCompleted}
+Internships: ${studentProfile.internships}
+Skill Gaps: ${(studentProfile.skillGaps || []).map((g: { skill: string; score: number }) => `${g.skill}(${g.score}%)`).join(', ')}
+Goals: ${(studentProfile.semesterGoals || []).map((g: { done: boolean; text: string }) => `[${g.done ? '✓' : ' '}] ${g.text}`).join(', ')}`
+            : SYSTEM_PROMPT;
+
+        const reply = await callGroq(systemPrompt, messages, false);
+        return NextResponse.json({ reply });
+
+    } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Chat API error:', msg);
+        if (msg.startsWith('RATE_LIMIT')) {
+            return NextResponse.json({ reply: '⏳ AI is a bit busy right now. Please wait a moment and try again!' }, { status: 200 });
         }
-
-        const data = await response.json();
-        return NextResponse.json({ reply: data.reply });
-
-    } catch (error) {
-        console.error('Chat proxy error:', error);
-        return NextResponse.json(
-            { reply: 'Sorry, I am having trouble connecting to the AI service. Please ensure the backend server is running.' },
-            { status: 200 }
-        );
+        return NextResponse.json({ reply: 'Sorry, I am having trouble connecting. Please try again.' }, { status: 200 });
     }
 }

@@ -1,40 +1,33 @@
 import { NextResponse } from 'next/server';
+import { callGroq } from '@/lib/gemini';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+const SYSTEM_PROMPT = `You are an AI Real-Time Communication Trainer for students preparing for placements.
 
-const SYSTEM_PROMPT = `You are an AI Real-Time Communication Trainer.
-Your task is to analyze the student's spoken or written sentence and provide structured feedback while maintaining a conversational flow.
-
-Provide the response ONLY as a valid JSON object with this exact structure:
+Return a valid JSON object with EXACTLY this structure (no extra text, no markdown):
 {
-  "correctSentence": "The sentence rewritten in grammatically correct and natural English",
+  "correctSentence": "Grammatically correct version of the input",
   "grammarMistakes": [
-    { "error": "description of mistake", "explanation": "simple explanation" }
+    { "error": "Description of the mistake", "explanation": "Simple explanation of the rule" }
   ],
   "vocabularyImprovement": [
-    { "original": "word used", "better": "more professional word", "reason": "why it's better" }
+    { "original": "word used", "better": "more professional word", "reason": "why it is better" }
   ],
-  "fluencyFeedback": "Explanation of how natural it sounds and smoother alternatives",
+  "fluencyFeedback": "How natural the sentence sounds and smoother alternatives",
   "pronunciationTips": [
-    { "word": "word", "tip": "how to pronounce it" }
+    { "word": "word", "tip": "how to pronounce it correctly" }
   ],
   "scores": {
-    "grammar": 0,
-    "fluency": 0,
-    "vocabulary": 0,
-    "pronunciation": 0,
-    "confidence": 0
+    "grammar": 75,
+    "fluency": 70,
+    "vocabulary": 65,
+    "pronunciation": 80,
+    "confidence": 72
   },
-  "professionalVersion": "More professional or interview-ready version",
-  "practiceSuggestion": "One short speaking exercise",
+  "professionalVersion": "A more interview-ready version of the sentence",
+  "practiceSuggestion": "One short speaking exercise to improve",
   "conversationalResponse": "A natural, supportive response to what the student said",
   "followUpQuestion": "One question to encourage the student to keep speaking"
-}
-
-RULES:
-- Keep all explanations simple (suitable for students).
-- Be conversational and supportive.
-- Return ONLY the JSON object, no markdown, no extra text.`;
+}`;
 
 export async function POST(req: Request) {
     try {
@@ -45,50 +38,20 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'No sentence provided' }, { status: 400 });
         }
 
-        const userMessage = `Input Sentence: "${sentence}"`;
-
-        // Forward to backend LLM service (same as chat)
-        const response = await fetch(`${BACKEND_URL}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                messages: [
-                    { role: 'user', content: userMessage }
-                ],
-                systemPrompt: SYSTEM_PROMPT,
-                model: 'mistralai/Mistral-7B-Instruct-v0.3'
-            }),
-            signal: AbortSignal.timeout(30000)
-        });
-
-        if (!response.ok) {
-            return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
-        }
-
-        const data = await response.json();
-        const rawReply: string = data.reply || '';
-
-        // Parse JSON out of the LLM response
-        let parsed;
-        try {
-            // More robust JSON extraction: find first '{' and last '}'
-            const start = rawReply.indexOf('{');
-            const end = rawReply.lastIndexOf('}');
-            if (start !== -1 && end !== -1) {
-                const jsonContent = rawReply.substring(start, end + 1);
-                parsed = JSON.parse(jsonContent);
-            } else {
-                throw new Error('No JSON object found');
-            }
-        } catch {
-            // Fallback: return raw text so UI can show it
-            return NextResponse.json({ rawReply }, { status: 200 });
-        }
-
+        const reply = await callGroq(
+            SYSTEM_PROMPT,
+            [{ role: 'user', content: `Analyze this sentence: "${sentence}"` }],
+            true
+        );
+        const parsed = JSON.parse(reply);
         return NextResponse.json(parsed);
 
-    } catch (error) {
-        console.error('Communication trainer error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Communication trainer error:', msg);
+        if (msg.startsWith('RATE_LIMIT')) {
+            return NextResponse.json({ error: '⏳ AI is busy. Please wait a moment and try again.' }, { status: 429 });
+        }
+        return NextResponse.json({ error: 'Failed to analyze sentence. Please try again.' }, { status: 500 });
     }
 }

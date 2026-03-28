@@ -53,8 +53,7 @@ export default function ChatPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     messages: apiMessages,
-                    studentId: student.id,        // current logged-in student
-                    requestingStudentId: student.id, // security: logged-in user
+                    studentProfile: student,   // send full profile for context
                 })
             });
 

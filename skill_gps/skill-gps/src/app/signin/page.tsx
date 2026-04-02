@@ -80,13 +80,27 @@ export default function SignInPage() {
                         Sign in to continue exploring your career roadmap.
                     </p>
 
-                    <form onSubmit={(e) => { e.preventDefault(); router.push("/dashboard"); }}>
+                    <form onSubmit={async (e) => { 
+                        e.preventDefault(); 
+                        const email = (e.target as any).email.value.trim();
+                        const password = (e.target as any).password.value.trim();
+                        try {
+                            const { signInWithEmailAndPassword } = await import("firebase/auth");
+                            const { auth } = await import("@/lib/firebase");
+                            const userCred = await signInWithEmailAndPassword(auth, email, password);
+                            localStorage.setItem("skillgps_student_id", userCred.user.uid);
+                            router.push("/dashboard"); 
+                        } catch (error: any) {
+                            alert("Sign in failed: " + error.message);
+                        }
+                    }}>
                         <div style={{ marginBottom: 16 }}>
-                            <label style={{ display: "block", fontSize: "0.85rem", color: "var(--white-muted)", marginBottom: 8 }}>Username / Email</label>
+                            <label style={{ display: "block", fontSize: "0.85rem", color: "var(--white-muted)", marginBottom: 8 }}>Email</label>
                             <input
+                                name="email"
                                 className="input-field"
-                                type="text"
-                                placeholder="username or email"
+                                type="email"
+                                placeholder="name@domain.com"
                                 style={{ width: "100%" }}
                                 required
                             />
@@ -95,6 +109,7 @@ export default function SignInPage() {
                         <div style={{ marginBottom: 24 }}>
                             <label style={{ display: "block", fontSize: "0.85rem", color: "var(--white-muted)", marginBottom: 8 }}>Password</label>
                             <input
+                                name="password"
                                 className="input-field"
                                 type="password"
                                 placeholder="••••••••"

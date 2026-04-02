@@ -101,7 +101,7 @@ export default function ChatPage() {
             <div style={{ marginBottom: 24, padding: "24px", background: "var(--bg-tertiary)", borderRadius: 16, border: "1px solid var(--border-light)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                     <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "1.8rem", fontWeight: 400, color: "var(--text-primary)", marginBottom: 4 }}>
-                        Chat with <span style={{ fontStyle: "italic", color: "var(--accent)" }}>Gemini AI</span>
+                        Personalised  <span style={{ fontStyle: "italic", color: "var(--accent)" }}>AI</span>
                     </h1>
                     <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "0.95rem" }}>
                         Context-aware AI powered by Gemini 1.5 Flash — mapped directly to your Skill DNA.
@@ -165,7 +165,7 @@ export default function ChatPage() {
                                 borderRadius: "20px 20px 20px 4px", fontSize: "0.95rem", lineHeight: 1.5,
                                 border: "1px solid var(--border-light)", display: "flex", alignItems: "center", gap: 8
                             }}>
-                                <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>Gemini AI is thinking</span>
+                                <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>thinking</span>
                                 {[0, 0.2, 0.4].map((delay, i) => (
                                     <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: "bounce 1.4s infinite ease-in-out both", animationDelay: `${delay}s` }} />
                                 ))}

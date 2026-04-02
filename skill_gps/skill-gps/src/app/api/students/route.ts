@@ -6,12 +6,20 @@ import path from 'path';
 const DB_PATH = path.join(process.cwd(), '..', 'backend', 'students.json');
 
 function readStudents() {
-    const raw = fs.readFileSync(DB_PATH, 'utf-8');
-    return JSON.parse(raw);
+    try {
+        const raw = fs.readFileSync(DB_PATH, 'utf-8');
+        return JSON.parse(raw);
+    } catch (e) {
+        return [];
+    }
 }
 
 function writeStudents(students: unknown[]) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(students, null, 2));
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify(students, null, 2));
+    } catch (e) {
+        console.warn("Could not write to fallback local json file.");
+    }
 }
 
 // GET /api/students?college=...
@@ -19,12 +27,14 @@ export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const college = searchParams.get('college');
+
         let students = readStudents();
         if (college && college !== 'admin') {
             students = students.filter((s: { college: string }) =>
                 s.college.toLowerCase().includes(college.toLowerCase())
             );
         }
+
         return NextResponse.json(students);
     } catch {
         return NextResponse.json({ error: 'Failed to fetch students' }, { status: 500 });
@@ -35,9 +45,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const students = readStudents();
-        const newStudent = {
-            id: `STU${String(students.length + 1).padStart(3, '0')}`,
+        const baseStudent = {
             ...body,
             careerProbability: body.careerProbability || 50,
             joinedDate: new Date().toISOString().split('T')[0],
@@ -53,10 +61,18 @@ export async function POST(req: Request) {
             semesterGoals: body.semesterGoals || [],
             recentActivity: [],
         };
-        students.push(newStudent);
+
+        // Save to local json array
+        const students = readStudents();
+        const newStudentLocal = {
+            id: `STU${String(students.length + 1).padStart(3, '0')}`,
+            ...baseStudent,
+        };
+        students.push(newStudentLocal);
         writeStudents(students);
-        return NextResponse.json(newStudent, { status: 201 });
-    } catch {
-        return NextResponse.json({ error: 'Failed to add student' }, { status: 500 });
+        
+        return NextResponse.json(newStudentLocal, { status: 201 });
+    } catch (err: any) {
+        return NextResponse.json({ error: 'Failed to add student', details: err.message }, { status: 500 });
     }
 }

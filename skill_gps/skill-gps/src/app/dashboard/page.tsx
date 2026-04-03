@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useStudent } from "@/lib/StudentContext";
 import {
-    Activity, Award, Code2, MessageSquare, Zap, TrendingUp, FileText, ChevronRight, ExternalLink, X, Target, Plus, CheckSquare, Square, Users, PlayCircle
+    Activity, Award, Code2, MessageSquare, Zap, TrendingUp, FileText, ChevronRight, ExternalLink, X, Target, Plus, CheckSquare, Square, Users, PlayCircle, Loader2, Sparkles
 } from "lucide-react";
 
 import mascotImg from "@/assets/mascot.png";
@@ -16,10 +16,16 @@ export default function DashboardHome() {
     const [selectedBadge, setSelectedBadge] = useState<any>(null);
     const [insights, setInsights] = useState<any[]>([]);
     const [insightsLoading, setInsightsLoading] = useState(true);
+    const [platformStats, setPlatformStats] = useState<any>(null);
+    const [syncing, setSyncing] = useState(false);
 
     // Editable Semester Goals loaded from student data
     const [semesterTasks, setSemesterTasks] = useState(student.semesterGoals);
     const [newTaskText, setNewTaskText] = useState("");
+
+    useEffect(() => {
+        setSemesterTasks(student.semesterGoals);
+    }, [student.semesterGoals]);
 
     const toggleTask = (id: number) => {
         setSemesterTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
@@ -31,6 +37,26 @@ export default function DashboardHome() {
             setNewTaskText("");
         }
     };
+
+    const fetchPlatformStats = async () => {
+        if (!student.githubUsername && !student.leetcodeUsername) return;
+        setSyncing(true);
+        try {
+            const res = await fetch(`/api/stats/platforms?github=${student.githubUsername}&leetcode=${student.leetcodeUsername}`);
+            if (res.ok) {
+                const data = await res.json();
+                setPlatformStats(data);
+            }
+        } catch (error) {
+            console.error("Failed to sync platform stats", error);
+        } finally {
+            setSyncing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPlatformStats();
+    }, [student.githubUsername, student.leetcodeUsername]);
 
     useEffect(() => {
         const fetchInsights = async () => {
@@ -111,28 +137,45 @@ export default function DashboardHome() {
 
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
                     <div style={{ width: 120, height: 120, borderRadius: "50%", background: "linear-gradient(135deg, #3B82F6, #A855F7)", border: "2px solid #39d353", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ fontSize: "4rem", color: "white", fontWeight: 700, fontFamily: "var(--font-serif)" }}>{student.name.charAt(0)}</span>
+                        {platformStats?.github?.avatar ? (
+                            <img src={platformStats.github.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                            <span style={{ fontSize: "4rem", color: "white", fontWeight: 700, fontFamily: "var(--font-serif)" }}>{student.name.charAt(0)}</span>
+                        )}
                     </div>
                     <div style={{ textAlign: "center" }}>
-                        <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "1.8rem", fontWeight: 600, margin: 0 }}>{student.name}</h1>
+                        <h1 style={{ fontFamily: "var(--font-primary)", fontSize: "2rem", fontWeight: 700, margin: 0, letterSpacing: "-0.03em", color: "var(--text-primary)" }}>{student.name}</h1>
                         <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", margin: "4px 0 0" }}>@{student.githubUsername}</p>
                     </div>
-                    <button style={{ width: "100%", padding: "8px", background: "var(--bg-tertiary)", border: "1px solid var(--border-color)", borderRadius: 6, fontWeight: 500, cursor: "pointer", color: "var(--text-primary)" }}>Edit Profile</button>
+                    <button 
+                        onClick={fetchPlatformStats}
+                        disabled={syncing}
+                        style={{ width: "100%", padding: "8px", background: "var(--bg-tertiary)", border: "1px solid var(--border-color)", borderRadius: 6, fontWeight: 500, cursor: "pointer", color: "var(--text-primary)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                    >
+                        {syncing ? <Loader2 size={16} className="animate-spin" /> : <Activity size={16} />}
+                        {syncing ? "Syncing..." : "Sync Platforms"}
+                    </button>
                 </div>
 
                 <div style={{ flex: 1, minWidth: 280, paddingTop: 16 }}>
                     <div style={{ display: "flex", gap: 24, marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid var(--border-light)" }}>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>LC Rank</span>
-                            <span style={{ fontSize: "1.4rem", fontFamily: "var(--font-serif)", color: "var(--text-primary)", fontWeight: 500 }}>{student.leetcodeRank.toLocaleString()}</span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600, marginBottom: 4 }}>LC Rank</span>
+                            <span style={{ fontSize: "1.6rem", fontFamily: "var(--font-primary)", color: "var(--text-primary)", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                                {platformStats?.leetcode?.ranking ? platformStats.leetcode.ranking.toLocaleString() : student.leetcodeRank.toLocaleString()}
+                            </span>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>CGPA</span>
-                            <span style={{ fontSize: "1.4rem", fontFamily: "var(--font-serif)", color: "var(--text-primary)", fontWeight: 500 }}>{student.cgpa}</span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600, marginBottom: 4 }}>Solved</span>
+                            <span style={{ fontSize: "1.6rem", fontFamily: "var(--font-primary)", color: "var(--text-primary)", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                                {platformStats?.leetcode?.totalSolved || student.projectsCompleted}
+                            </span>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Institution</span>
-                            <span style={{ fontSize: "1rem", color: "var(--text-primary)", fontWeight: 500, maxWidth: 150, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{student.college}</span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600, marginBottom: 4 }}>GH Repos</span>
+                            <span style={{ fontSize: "1.6rem", fontFamily: "var(--font-primary)", color: "var(--text-primary)", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                                {platformStats?.github?.publicRepos || 0}
+                            </span>
                         </div>
                     </div>
 
@@ -140,26 +183,21 @@ export default function DashboardHome() {
                     <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                             <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-                                <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>Semester Activity</span> (GitHub, LeetCode, SkillRack)
+                                <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>Live Activity Feed</span>
                             </div>
-                            <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Total: 1,245 submissions</div>
+                            <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                                {platformStats?.github?.recentEvents?.length || 0} recent activities
+                            </div>
                         </div>
-                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", opacity: 0.9 }}>
-                            {Array.from({ length: 110 }).map((_, i) => {
-                                // Simulate multi-platform heatmap colors
-                                const rand = (Math.sin(i * 123.45) * 0.5 + 0.5);
-                                const colorType = (Math.sin(i * 321.1) * 0.5 + 0.5);
-
-                                let bg = "var(--bg-tertiary)";
-                                if (rand > 0.2) {
-                                    const intensity = rand > 0.8 ? 0.9 : rand > 0.5 ? 0.6 : 0.3;
-                                    if (colorType > 0.66) bg = `rgba(57, 211, 83, ${intensity})`; // GitHub Green
-                                    else if (colorType > 0.33) bg = `rgba(255, 161, 22, ${intensity})`; // LeetCode Orange
-                                    else bg = `rgba(0, 184, 148, ${intensity})`; // SkillRack Teal
-                                }
-
-                                return <div key={i} style={{ width: 12, height: 12, borderRadius: 2, background: bg }} />
-                            })}
+                        <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }} className="custom-scrollbar">
+                            {platformStats?.github?.recentEvents?.map((ev: any, i: number) => (
+                                <div key={i} style={{ background: "rgba(255,255,255,0.03)", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border-light)", minWidth: 180, flexShrink: 0 }}>
+                                    <div style={{ fontSize: "0.75rem", color: "#39d353", marginBottom: 4 }}>{ev.type.replace("Event", "")}</div>
+                                    <div style={{ fontSize: "0.85rem", color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ev.repo}</div>
+                                    <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{new Date(ev.date).toLocaleDateString()}</div>
+                                </div>
+                            ))}
+                            {!platformStats?.github?.recentEvents?.length && <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No recent events found.</div>}
                         </div>
                     </div>
                 </div>
@@ -188,9 +226,9 @@ export default function DashboardHome() {
 
                     <div style={{ display: "flex", flexDirection: "column", gap: 24, position: "relative", zIndex: 2 }}>
                         {[
-                            { name: "LeetCode", streak: `${student.leetcodeStreak} Day Streak`, baseColor: "255, 161, 22" },
-                            { name: "SkillRack", streak: `${student.skillrackStreak} Day Streak`, baseColor: "0, 184, 148" },
-                            { name: "GitHub", streak: `${student.githubStreak} Day Streak`, baseColor: "57, 211, 83" }
+                            { name: "LeetCode", streak: platformStats?.leetcode?.streak || student.leetcodeStreak, suffix: "Day Streak", baseColor: "255, 161, 22" },
+                            { name: "SkillRack", streak: student.skillrackStreak, suffix: "Day Streak", baseColor: "0, 184, 148" },
+                            { name: "GitHub", streak: student.githubStreak, suffix: "Day Streak", baseColor: "57, 211, 83" }
                         ].map((plat, i) => (
                             <div key={i} style={{
                                 background: "rgba(255,255,255,0.02)",
@@ -200,15 +238,17 @@ export default function DashboardHome() {
                             }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, alignItems: "center" }}>
                                     <span style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--text-primary)" }}>{plat.name}</span>
-                                    <span style={{ color: `rgb(${plat.baseColor})`, fontSize: "0.85rem", fontWeight: 600, padding: "2px 8px", background: `rgba(${plat.baseColor}, 0.1)`, border: `1px solid rgba(${plat.baseColor}, 0.2)`, borderRadius: 100 }}>{plat.streak}</span>
+                                    <span style={{ color: `rgb(${plat.baseColor})`, fontSize: "0.85rem", fontWeight: 600, padding: "2px 8px", background: `rgba(${plat.baseColor}, 0.1)`, border: `1px solid rgba(${plat.baseColor}, 0.2)`, borderRadius: 100 }}>
+                                        {plat.streak} {plat.suffix}
+                                    </span>
                                 </div>
                                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap", opacity: 0.9 }}>
-                                    {Array.from({ length: 60 }).map((_, j) => {
-                                        // Generate randomish heatmap pattern
-                                        const rand = Math.random();
+                                    {Array.from({ length: 50 }).map((_, j) => {
+                                        // Pseudo-random but consistent per platform
+                                        const rand = (Math.sin((i+1)*(j+1)/5) + 1) / 2;
                                         const level = plat.name === "GitHub" ? (rand > 0.3 ? rand : 0) : (rand > 0.6 ? rand : 0);
                                         const opacity = level > 0.8 ? 1 : level > 0.5 ? 0.7 : level > 0.2 ? 0.4 : 0.1;
-                                        const bg = level > 0 ? `rgba(${plat.baseColor}, ${opacity})` : "var(--bg-tertiary)";
+                                        const bg = level > 0 ? `rgba(${plat.baseColor}, ${opacity})` : "rgba(255,255,255,0.03)";
                                         return <div key={j} style={{ width: 10, height: 10, borderRadius: 2, background: bg }} />
                                     })}
                                 </div>
@@ -245,32 +285,37 @@ export default function DashboardHome() {
                         <div style={{ position: "absolute", top: -30, right: -30, width: 250, height: 250, background: "rgba(168, 192, 255, 0.1)", filter: "blur(80px)", borderRadius: "50%", pointerEvents: "none" }}></div>
 
                         <h3 style={{ fontSize: "1.3rem", fontWeight: 500, color: "var(--text-primary)", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", zIndex: 2 }}>
-                            <span style={{ display: "flex", alignItems: "center", gap: 10 }}><Zap size={22} color="#A8C0FF" /> Areas to Focus On</span>
+                            <span style={{ display: "flex", alignItems: "center", gap: 10 }}><Sparkles size={22} color="#A8C0FF" /> Areas to Focus On</span>
                             <ChevronRight color="var(--text-secondary)" />
                         </h3>
 
                         <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginBottom: 28, position: "relative", zIndex: 2 }}>
-                            AI Analytics has identified skill gaps in your current trajectory. Click to view recommended roadmap paths.
+                            AI Analytics has identified these skill gaps in your current trajectory. Strengthen them to reach your goal.
                         </p>
 
                         <div style={{ display: "flex", flexDirection: "column", gap: 16, position: "relative", zIndex: 2 }}>
-                            {student.skillGaps.map((area, i) => (
-                                <div key={i} style={{
-                                    background: "rgba(0,0,0,0.2)",
-                                    padding: "16px",
-                                    borderRadius: 16,
-                                    border: "1px solid rgba(255,255,255,0.05)"
-                                }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-                                        <span style={{ fontSize: "0.95rem", fontWeight: 500, color: "var(--text-primary)" }}>{area.skill}</span>
-                                        <span style={{ fontSize: "0.85rem", color: area.color, fontWeight: 600 }}>{area.score}%</span>
+                            {student.skillGaps.length > 0 ? (
+                                student.skillGaps.slice(0, 4).map((area: any, i: number) => (
+                                    <div key={i} style={{
+                                        background: "rgba(0,0,0,0.2)",
+                                        padding: "16px",
+                                        borderRadius: "16px",
+                                        border: "1px solid rgba(255,255,255,0.05)",
+                                    }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", color: "var(--text-primary)", marginBottom: 10, fontWeight: 500 }}>
+                                            <span>{area.skill}</span>
+                                            <span style={{ color: area.color }}>{area.score}% Proficiency</span>
+                                        </div>
+                                        <div style={{ height: 6, background: "rgba(255,255,255,0.05)", borderRadius: 100, overflow: "hidden" }}>
+                                            <div style={{ width: `${area.score}%`, height: "100%", background: area.color, borderRadius: 100 }} />
+                                        </div>
                                     </div>
-                                    <div style={{ height: 6, background: "rgba(0,0,0,0.3)", borderRadius: 100, overflow: "hidden" }}>
-                                        <div style={{ width: `${area.score}%`, height: "100%", background: area.color, borderRadius: 100 }} />
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                <div style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>No critical gaps analyzed yet. Connect more platforms to see insights.</div>
+                            )}
                         </div>
+
                     </div>
                 </Link>
             </div>

@@ -1,39 +1,22 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DB_PATH = path.join(process.cwd(), '..', 'backend', 'students.json');
-
-function readStudents() {
-    try {
-        const raw = fs.readFileSync(DB_PATH, 'utf-8');
-        return JSON.parse(raw);
-    } catch (e) {
-        return [];
-    }
-}
-
-function writeStudents(students: unknown[]) {
-    try {
-        fs.writeFileSync(DB_PATH, JSON.stringify(students, null, 2));
-    } catch (e) {
-        console.warn("Could not write to fallback local json file.");
-    }
-}
+import { db } from '@/lib/firebase';
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 // GET /api/students/[id]
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
+        const studentRef = doc(db, 'students', id);
+        const studentDoc = await getDoc(studentRef);
 
-        // Read from local JSON
-        const students = readStudents();
-        const student = students.find((s: { id: string }) => s.id === id);
-        if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+        if (!studentDoc.exists()) {
+            return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+        }
         
-        return NextResponse.json(student);
-    } catch {
-        return NextResponse.json({ error: 'Failed to fetch student' }, { status: 500 });
+        return NextResponse.json({ id: studentDoc.id, ...studentDoc.data() });
+    } catch (err: any) {
+        console.error("Fetch student error:", err);
+        return NextResponse.json({ error: 'Failed to fetch student', details: err.message }, { status: 500 });
     }
 }
 
@@ -43,16 +26,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const { id } = await params;
         const body = await req.json();
 
-        // Update local JSON
-        const students = readStudents();
-        const idx = students.findIndex((s: { id: string }) => s.id === id);
-        if (idx === -1) return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+        const studentRef = doc(db, 'students', id);
+        await updateDoc(studentRef, {
+            ...body,
+            updatedAt: new Date().toISOString()
+        });
         
-        students[idx] = { ...students[idx], ...body };
-        writeStudents(students);
-        
-        return NextResponse.json(students[idx]);
+        const updatedDoc = await getDoc(studentRef);
+        return NextResponse.json({ id: updatedDoc.id, ...updatedDoc.data() });
     } catch (err: any) {
+        console.error("Update student error:", err);
         return NextResponse.json({ error: 'Failed to update student', details: err.message }, { status: 500 });
     }
 }
@@ -61,17 +44,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-
-        // Delete from local JSON
-        const students = readStudents();
-        const idx = students.findIndex((s: { id: string }) => s.id === id);
-        if (idx === -1) return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+        const studentRef = doc(db, 'students', id);
         
-        students.splice(idx, 1);
-        writeStudents(students);
+        await deleteDoc(studentRef);
         
         return NextResponse.json({ success: true });
     } catch (err: any) {
+        console.error("Delete student error:", err);
         return NextResponse.json({ error: 'Failed to delete student', details: err.message }, { status: 500 });
     }
 }

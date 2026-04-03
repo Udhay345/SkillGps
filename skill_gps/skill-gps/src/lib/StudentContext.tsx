@@ -7,13 +7,16 @@ const BLANK_STUDENT: Student = {
     id: "", name: "Loading...", email: "", regNo: "", college: "", department: "",
     year: 1, semester: 1, section: "A", cgpa: 0,
     careerTarget: "", careerProbability: 50, joinedDate: "", attendance: 0,
-    projectsCompleted: 0, internships: 0, githubUsername: "", leetcodeRank: 0,
+    projectsCompleted: 0, internships: 0, githubUsername: "", 
+    leetcodeUsername: "", skillrackUsername: "",
+    leetcodeRank: 0,
     leetcodeStreak: 0, skillrackStreak: 0, githubStreak: 0, totalXP: 0, level: 1,
-    badges: [], skillGaps: [], semesterGoals: [], recentActivity: [],
+    badges: [], skillGaps: [], semesterGoals: [], recentActivity: [], certificates: [],
 };
 
 type StudentContextType = {
     student: Student;
+    setStudent: (student: Student) => void;
     setStudentById: (id: string) => void;
     allStudents: Student[];
     isLoading: boolean;
@@ -106,7 +109,7 @@ export function StudentProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <StudentContext.Provider value={{ student, setStudentById, allStudents: students, isLoading }}>
+        <StudentContext.Provider value={{ student, setStudent, setStudentById, allStudents: students, isLoading }}>
             {children}
         </StudentContext.Provider>
     );

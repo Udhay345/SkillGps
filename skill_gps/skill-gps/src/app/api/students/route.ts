@@ -1,43 +1,31 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-// Path to the students database (in the backend folder alongside this project)
-const DB_PATH = path.join(process.cwd(), '..', 'backend', 'students.json');
-
-function readStudents() {
-    try {
-        const raw = fs.readFileSync(DB_PATH, 'utf-8');
-        return JSON.parse(raw);
-    } catch (e) {
-        return [];
-    }
-}
-
-function writeStudents(students: unknown[]) {
-    try {
-        fs.writeFileSync(DB_PATH, JSON.stringify(students, null, 2));
-    } catch (e) {
-        console.warn("Could not write to fallback local json file.");
-    }
-}
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // GET /api/students?college=...
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
-        const college = searchParams.get('college');
+        const collegeParam = searchParams.get('college');
 
-        let students = readStudents();
-        if (college && college !== 'admin') {
-            students = students.filter((s: { college: string }) =>
-                s.college.toLowerCase().includes(college.toLowerCase())
+        const studentsRef = collection(db, 'students');
+        const querySnapshot = await getDocs(studentsRef);
+        let students = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })) as any[];
+        
+        if (collegeParam && collegeParam.toLowerCase() !== 'admin') {
+            const searchCol = collegeParam.trim().toLowerCase();
+            students = students.filter(s => 
+                s.college && s.college.trim().toLowerCase() === searchCol
             );
         }
 
         return NextResponse.json(students);
-    } catch {
-        return NextResponse.json({ error: 'Failed to fetch students' }, { status: 500 });
+    } catch (err: any) {
+        console.error("Fetch students error:", err);
+        return NextResponse.json({ error: 'Failed to fetch students', details: err.message }, { status: 500 });
     }
 }
 
@@ -60,19 +48,14 @@ export async function POST(req: Request) {
             skillGaps: body.skillGaps || [],
             semesterGoals: body.semesterGoals || [],
             recentActivity: [],
+            createdAt: serverTimestamp(),
         };
 
-        // Save to local json array
-        const students = readStudents();
-        const newStudentLocal = {
-            id: `STU${String(students.length + 1).padStart(3, '0')}`,
-            ...baseStudent,
-        };
-        students.push(newStudentLocal);
-        writeStudents(students);
+        const docRef = await addDoc(collection(db, 'students'), baseStudent);
         
-        return NextResponse.json(newStudentLocal, { status: 201 });
+        return NextResponse.json({ id: docRef.id, ...baseStudent }, { status: 201 });
     } catch (err: any) {
+        console.error("Add student error:", err);
         return NextResponse.json({ error: 'Failed to add student', details: err.message }, { status: 500 });
     }
 }

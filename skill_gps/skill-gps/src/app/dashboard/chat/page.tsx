@@ -234,7 +234,7 @@ export default function ChatPage() {
                         </button>
                     </div>
                     <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: 10, textAlign: "center" }}>
-                        🔒 Powered by Gemini AI • Your personal data is never shared with other users
+                         • Your personal data is never shared with other users
                     </p>
                 </div>
             </div>

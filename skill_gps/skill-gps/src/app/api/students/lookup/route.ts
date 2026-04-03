@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DB_PATH = path.join(process.cwd(), '..', 'backend', 'students.json');
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 
 // GET /api/students/lookup?email=...
 export async function GET(req: Request) {
@@ -11,24 +9,29 @@ export async function GET(req: Request) {
         const email = searchParams.get('email');
         if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
 
-        const raw = fs.readFileSync(DB_PATH, 'utf-8');
-        const students = JSON.parse(raw);
-        const student = students.find((s: { email: string }) =>
-            s.email.toLowerCase() === email.toLowerCase()
-        );
-        if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+        const studentsRef = collection(db, 'students');
+        const q = query(studentsRef, where('email', '==', email.toLowerCase()), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+        }
+
+        const studentData = querySnapshot.docs[0].data();
+        const studentId = querySnapshot.docs[0].id;
 
         // Return only safe fields for onboarding verification
         return NextResponse.json({
-            id: student.id,
-            name: student.name,
-            regNo: student.regNo,
-            year: student.year,
-            section: student.section,
-            department: student.department,
-            college: student.college,
+            id: studentId,
+            name: studentData.name,
+            regNo: studentData.regNo,
+            year: studentData.year,
+            section: studentData.section,
+            department: studentData.department,
+            college: studentData.college,
         });
-    } catch {
-        return NextResponse.json({ error: 'Failed to lookup student' }, { status: 500 });
+    } catch (err: any) {
+        console.error("Lookup student error:", err);
+        return NextResponse.json({ error: 'Failed to lookup student', details: err.message }, { status: 500 });
     }
 }

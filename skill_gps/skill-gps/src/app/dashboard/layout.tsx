@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useStudent } from "@/lib/StudentContext";
 import logo from "@/assets/logo.png";
-import { LayoutDashboard, Fingerprint, LineChart, AlertCircle, Map as MapIcon, Bot, FileText, ChevronLeft, ChevronRight, Bell, MessageSquare, BrainCircuit, Mic, Code } from "lucide-react";
+import { LayoutDashboard, Fingerprint, LineChart, AlertCircle, Map as MapIcon, Bot, FileText, ChevronLeft, ChevronRight, Bell, MessageSquare, BrainCircuit, Mic } from "lucide-react";
 import mascotImg from "@/assets/mascot.png";
 
 const NAV_ITEMS = [
@@ -13,7 +13,6 @@ const NAV_ITEMS = [
     { id: "roadmap", path: "/dashboard/roadmap", icon: <MapIcon size={20} strokeWidth={1.5} />, label: "Roadmap" },
     { id: "assessments", path: "/dashboard/assessments", icon: <LineChart size={20} strokeWidth={1.5} />, label: "Assessments" },
     { id: "projects", path: "/dashboard/projects", icon: <Bot size={20} strokeWidth={1.5} />, label: "Projects & Hackathons" },
-    { id: "coding-tracker", path: "/dashboard/coding-tracker", icon: <Code size={20} strokeWidth={1.5} />, label: "Coding Tracker" },
     { id: "aptitude-trainer", path: "/dashboard/aptitude-trainer", icon: <BrainCircuit size={20} strokeWidth={1.5} />, label: "Aptitude Trainer" },
     { id: "resume", path: "/dashboard/resume", icon: <AlertCircle size={20} strokeWidth={1.5} />, label: "Resume Optimizer" },
     { id: "mentor", path: "/dashboard/mentor", icon: <FileText size={20} strokeWidth={1.5} />, label: "Mentor Guide" },
@@ -60,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none" }}>
                         <Image src={logo} alt="Logo" width={32} height={32} style={{ borderRadius: "8px", flexShrink: 0 }} />
                         {!sidebarCollapsed && (
-                            <span style={{ fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "1.1rem", color: "var(--text-primary)", whiteSpace: "nowrap" }}>
+                            <span style={{ fontFamily: "var(--font-primary)", fontWeight: 700, fontSize: "1.2rem", color: "var(--text-primary)", whiteSpace: "nowrap", letterSpacing: "-0.03em" }}>
                                 Skill GPS
                             </span>
                         )}
@@ -125,7 +124,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <main style={{ flex: 1, height: "100%", overflowY: "auto", display: "flex", flexDirection: "column", position: "relative" }}>
                 <header style={{ padding: "0 40px", height: "80px", borderBottom: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-secondary)", position: "sticky", top: 0, zIndex: 40 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "1.25rem", fontWeight: 500, color: "var(--text-primary)" }}>
+                        <h2 style={{ fontFamily: "var(--font-primary)", fontSize: "1.4rem", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
                             {NAV_ITEMS.find(n => n.path === pathname)?.label || "Overview"}
                         </h2>
                     </div>

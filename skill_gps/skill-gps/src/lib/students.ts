@@ -3,6 +3,18 @@
 // Replace this with real DB/Auth calls later
 // =============================================
 
+export type Certificate = {
+    id: string;
+    title: string;
+    description?: string;
+    issuer: string;
+    date: string;
+    fileUrl: string;
+    status: 'pending' | 'verified' | 'rejected';
+    verifiedBy?: string;
+    verifiedAt?: string;
+};
+
 export type Student = {
     id: string;
     name: string;
@@ -21,6 +33,8 @@ export type Student = {
     projectsCompleted: number;
     internships: number;
     githubUsername: string;
+    leetcodeUsername: string;
+    skillrackUsername: string;
     leetcodeRank: number;
     leetcodeStreak: number;
     skillrackStreak: number;
@@ -31,6 +45,7 @@ export type Student = {
     skillGaps: { skill: string; score: number; color: string }[];
     semesterGoals: { id: number; text: string; done: boolean }[];
     recentActivity: { type: string; title: string; date: string; icon: string }[];
+    certificates: Certificate[];
 };
 
 export const STUDENTS: Student[] = [];

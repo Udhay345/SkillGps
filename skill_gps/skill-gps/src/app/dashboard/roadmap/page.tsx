@@ -10,6 +10,9 @@ import {
 import mascotImg from "@/assets/mascot.png";
 import trophyImg from "@/assets/trophy.png";
 
+import { useEffect } from "react";
+import { useStudent } from "@/lib/StudentContext";
+
 const ROADMAP_NODES = [
     { id: 1, title: "Frontend Foundation", status: "completed", xp: 150, description: "Mastering HTML, CSS, JavaScript basics and DOM manipulation.", icon: <BookOpen size={18} /> },
     { id: 2, title: "React & Next.js Ecosystem", status: "active", xp: 300, description: "Building interactive user interfaces, SSR, state management.", icon: <Sparkles size={18} /> },
@@ -26,19 +29,22 @@ const MARKETPLACE_SKILLS = [
 ];
 
 export default function RoadmapPage() {
-    const [selectedNode, setSelectedNode] = useState<{ id: number, title: string, status: string, xp: number, description: string, icon: React.ReactNode } | null>(null);
+    const { student } = useStudent();
+    const [selectedNode, setSelectedNode] = useState<any>(null);
     const [roadmapData, setRoadmapData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [customRole, setCustomRole] = useState("");
 
     const handleGenerate = async (targetRole: string) => {
         setIsLoading(true);
         setError("");
         try {
+            const currentSkills = student.skillGaps.map((s: any) => s.skill).join(", ") || "Basics";
             const res = await fetch("/api/career-roadmap", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ currentSkills: "JavaScript, HTML, CSS", targetRole }),
+                body: JSON.stringify({ currentSkills, targetRole }),
             });
 
             if (!res.ok) throw new Error("Failed to generate roadmap");
@@ -50,6 +56,12 @@ export default function RoadmapPage() {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (!roadmapData && student.careerTarget && !isLoading) {
+            handleGenerate(student.careerTarget);
+        }
+    }, [student.careerTarget, roadmapData, isLoading]);
 
     const nodes = roadmapData?.nodes || ROADMAP_NODES;
 
@@ -66,17 +78,36 @@ export default function RoadmapPage() {
                         Your personalized path to mastering software engineering. Unlock nodes, gain XP, and acquire high-demand industry skills.
                     </p>
                 </div>
-                <div style={{ display: "flex", gap: 12 }}>
-                    <button 
-                        onClick={() => handleGenerate("Full Stack AI Engineer")}
-                        disabled={isLoading}
-                        style={{ padding: "10px 20px", borderRadius: "10px", background: "var(--accent)", color: "white", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
-                    >
-                        <Sparkles size={18} /> {isLoading ? "Generating..." : "Generate AI Roadmap"}
-                    </button>
-                    <div style={{ padding: "8px 16px", borderRadius: "100px", background: "rgba(168, 192, 255, 0.1)", border: "1px solid rgba(168, 192, 255, 0.2)", display: "flex", alignItems: "center", gap: 8 }}>
-                        <Zap size={16} color="#A8C0FF" />
-                        <span style={{ fontSize: "0.9rem", color: "#A8C0FF", fontWeight: 600 }}>1,250 Total XP</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-end" }}>
+                    <div style={{ display: "flex", gap: 12 }}>
+                        <input 
+                            type="text" 
+                            placeholder="Type a role (e.g. DevOps)..."
+                            value={customRole}
+                            onChange={(e) => setCustomRole(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && customRole && handleGenerate(customRole)}
+                            style={{ 
+                                background: "var(--bg-secondary)", 
+                                border: "1px solid var(--border-color)", 
+                                color: "var(--text-primary)", 
+                                padding: "10px 16px", 
+                                borderRadius: "10px",
+                                outline: "none",
+                                fontSize: "0.9rem",
+                                width: "240px"
+                            }}
+                        />
+                        <button 
+                            onClick={() => customRole && handleGenerate(customRole)}
+                            disabled={isLoading || !customRole}
+                            style={{ padding: "10px 20px", borderRadius: "10px", background: "var(--accent)", color: "white", border: "none", cursor: (isLoading || !customRole) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, transition: "all 0.2s" }}
+                        >
+                            <Sparkles size={18} /> {isLoading ? "Consulting AI..." : "Build Path"}
+                        </button>
+                    </div>
+                    <div style={{ padding: "8px 16px", borderRadius: "100px", background: "rgba(37, 99, 235, 0.1)", border: "1px solid rgba(37, 99, 235, 0.2)", display: "flex", alignItems: "center", gap: 8 }}>
+                        <Zap size={16} color="#3B82F6" />
+                        <span style={{ fontSize: "0.9rem", color: "var(--text-primary)", fontWeight: 600 }}>{student.totalXP.toLocaleString()} Total XP</span>
                     </div>
                 </div>
             </div>
@@ -171,27 +202,43 @@ export default function RoadmapPage() {
                 {/* Right Area: Market, Stats, Leaderboard */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
 
-                    {/* Active Goal Glass Card */}
+                    {/* AI Market Insights */}
                     <div style={{
-                        background: "linear-gradient(135deg, rgba(63, 43, 150, 0.8), rgba(168, 192, 255, 0.2))",
+                        background: "rgba(255, 255, 255, 0.03)",
                         backdropFilter: "blur(20px)",
-                        border: "1px solid rgba(168, 192, 255, 0.3)",
+                        border: "1px solid rgba(255,255,255,0.05)",
                         padding: "24px",
                         borderRadius: 20,
                         position: "relative",
                         overflow: "hidden"
                     }}>
-                        <div style={{ position: "absolute", right: -30, top: -30, width: 150, height: 150, background: "rgba(168,192,255,0.2)", filter: "blur(50px)", borderRadius: "50%" }}></div>
-                        <h4 style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16 }}>Current Primary Goal</h4>
-                        <div style={{ fontSize: "1.4rem", fontWeight: 500, color: "#fff", marginBottom: 20 }}>
-                            Land Summer Internship
+                        <h4 style={{ fontSize: "0.9rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+                            <TrendingUp size={16} /> Market Insight: {roadmapData?.targetRole || student.careerTarget}
+                        </h4>
+                        
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Demand</span>
+                                <span style={{ color: "#39d353", fontWeight: 600 }}>{roadmapData?.marketDemand || "High"}</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Avg. Pay</span>
+                                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{roadmapData?.avgSalary || "₹12-24 LPA"}</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Est. Time</span>
+                                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{roadmapData?.estimatedTime || "6-8 Months"}</span>
+                            </div>
                         </div>
-                        <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "100px", height: "8px", width: "100%", overflow: "hidden", marginBottom: 8 }}>
-                            <div style={{ width: "65%", height: "100%", background: "#A8C0FF", borderRadius: "100px" }}></div>
-                        </div>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "rgba(255,255,255,0.7)" }}>
-                            <span>Progress: 65%</span>
-                            <span>Est: 2 Months</span>
+
+                        <div style={{ marginTop: 24 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: 8 }}>
+                                <span>Path Completion</span>
+                                <span>{Math.round((nodes.filter((n:any) => n.status === 'completed').length / nodes.length) * 100)}%</span>
+                            </div>
+                            <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "100px", height: "10px", width: "100%", overflow: "hidden" }}>
+                                <div style={{ width: `${(nodes.filter((n:any) => n.status === 'completed').length / nodes.length) * 100}%`, height: "100%", background: "var(--accent)", borderRadius: "100px", transition: "width 1s ease" }}></div>
+                            </div>
                         </div>
                     </div>
 

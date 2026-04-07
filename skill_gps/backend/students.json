@@ -4,7 +4,7 @@
     "name": "Arjun Sharma",
     "email": "arjun.sharma@srmist.edu.in",
     "regNo": "RA2111003010001",
-    "college": "SRM Institute of Science and Technology",
+    "college": "Rajalakshmi institute of technology",
     "department": "Computer Science & Engineering",
     "year": 3,
     "semester": 5,
@@ -24,90 +24,16 @@
     "totalXP": 2450,
     "level": 12,
     "badges": [
-      {
-        "title": "Top 1% Solver",
-        "color": "#FFD700",
-        "date": "Jan 2025",
-        "desc": "Ranked in the top 1% of LeetCode solvers globally."
-      },
-      {
-        "title": "Master Builder",
-        "color": "#3B82F6",
-        "date": "Dec 2024",
-        "desc": "Completed 5+ full-stack projects on GitHub."
-      },
-      {
-        "title": "Open Source Contributor",
-        "color": "#39d353",
-        "date": "Nov 2024",
-        "desc": "Merged a PR into a public repository."
-      },
-      {
-        "title": "AI Enthusiast",
-        "color": "#A855F7",
-        "date": "Oct 2024",
-        "desc": "Completed an advanced AI certification."
-      },
-      {
-        "title": "Hackathon Finalist",
-        "color": "#FF8C00",
-        "date": "Sep 2024",
-        "desc": "Reached final round in SRM Hack 2024."
-      }
+      { "title": "Top 1% Solver", "color": "#FFD700", "date": "Jan 2025", "desc": "Ranked in the top 1% of LeetCode solvers globally." }
     ],
     "skillGaps": [
-      {
-        "skill": "System Design (Microservices)",
-        "score": 42,
-        "color": "#A8C0FF"
-      },
-      {
-        "skill": "AWS Cloud Deployment",
-        "score": 55,
-        "color": "#A855F7"
-      },
-      {
-        "skill": "Advanced Dynamic Programming",
-        "score": 61,
-        "color": "#3B82F6"
-      }
+      { "skill": "System Design", "score": 42, "color": "#A8C0FF" }
     ],
     "semesterGoals": [
-      {
-        "id": 1,
-        "text": "Finish AWS Cloud Practitioner Certification",
-        "done": false
-      },
-      {
-        "id": 2,
-        "text": "Solve 50 Medium LeetCode Questions",
-        "done": false
-      },
-      {
-        "id": 3,
-        "text": "Deploy Capstone Project to Vercel",
-        "done": true
-      }
+      { "id": 1, "text": "Finish AWS Certification", "done": false }
     ],
     "recentActivity": [
-      {
-        "type": "leetcode",
-        "title": "Solved 'Longest Substring Without Repeating Characters'",
-        "date": "2h ago",
-        "icon": "🔶"
-      },
-      {
-        "type": "github",
-        "title": "Pushed 3 commits to skill-gps repo",
-        "date": "5h ago",
-        "icon": "⬛"
-      },
-      {
-        "type": "skillrack",
-        "title": "Completed 2 SkillRack challenges",
-        "date": "Yesterday",
-        "icon": "🟢"
-      }
+      { "type": "leetcode", "title": "Solved DP problem", "date": "2h ago", "icon": "🔶" }
     ]
   },
   {
@@ -115,7 +41,7 @@
     "name": "Priya Nair",
     "email": "priya.nair@vit.ac.in",
     "regNo": "21BCE1234",
-    "college": "VIT University, Vellore",
+    "college": "Rajalakshmi institute of technology",
     "department": "Information Technology",
     "year": 3,
     "semester": 5,
@@ -134,258 +60,91 @@
     "githubStreak": 45,
     "totalXP": 4100,
     "level": 18,
-    "badges": [
-      {
-        "title": "Consistency Queen",
-        "color": "#FFD700",
-        "date": "Feb 2025",
-        "desc": "30-day streak on LeetCode."
-      },
-      {
-        "title": "Internship Ace",
-        "color": "#39d353",
-        "date": "Jan 2025",
-        "desc": "Secured 2 tech internships in Year 3."
-      },
-      {
-        "title": "Full Stack Pro",
-        "color": "#3B82F6",
-        "date": "Dec 2024",
-        "desc": "Deployed 5 full-stack applications to production."
-      }
-    ],
-    "skillGaps": [
-      {
-        "skill": "Docker & Kubernetes",
-        "score": 38,
-        "color": "#A8C0FF"
-      },
-      {
-        "skill": "Redis & Caching",
-        "score": 51,
-        "color": "#A855F7"
-      }
-    ],
-    "semesterGoals": [
-      {
-        "id": 1,
-        "text": "Complete React Native Course",
-        "done": true
-      },
-      {
-        "id": 2,
-        "text": "Deploy personal portfolio",
-        "done": true
-      },
-      {
-        "id": 3,
-        "text": "Contribute to open source project",
-        "done": false
-      }
-    ],
-    "recentActivity": [
-      {
-        "type": "github",
-        "title": "Opened PR in react-query",
-        "date": "1h ago",
-        "icon": "⬛"
-      },
-      {
-        "type": "leetcode",
-        "title": "Solved 'Two Sum' and 'Valid Parentheses'",
-        "date": "3h ago",
-        "icon": "🔶"
-      }
-    ]
+    "badges": [],
+    "recentActivity": []
   },
   {
     "id": "STU003",
-    "name": "Karthik Rajan",
-    "email": "karthik.rajan@nittrichy.ac.in",
-    "regNo": "NIT21CS050",
-    "college": "NIT Trichy",
-    "department": "Computer Science & Engineering",
-    "year": 4,
-    "semester": 7,
+    "name": "Yogesh Rajan",
+    "email": "yogesh.rajan@rit.edu.in",
+    "regNo": "2117240020401",
+    "college": "Rajalakshmi institute of technology",
+    "department": "CSE",
+    "year": 2,
+    "semester": 4,
     "section": "A",
-    "cgpa": 7.8,
-    "careerTarget": "DevOps Engineer",
-    "careerProbability": 61,
-    "joinedDate": "2021-08-01",
-    "attendance": 82,
+    "cgpa": 8.7,
+    "careerTarget": "Full Stack Developer",
+    "careerProbability": 68,
+    "joinedDate": "2023-08-01",
+    "attendance": 90,
     "projectsCompleted": 4,
     "internships": 1,
-    "githubUsername": "karthik-ops",
-    "leetcodeRank": 3800,
-    "leetcodeStreak": 5,
-    "skillrackStreak": 3,
-    "githubStreak": 12,
-    "totalXP": 1800,
-    "level": 9,
-    "badges": [
-      {
-        "title": "Docker Captain",
-        "color": "#00D4FF",
-        "date": "Mar 2025",
-        "desc": "Containerized 3 production applications."
-      },
-      {
-        "title": "CI/CD Builder",
-        "color": "#FF8C00",
-        "date": "Jan 2025",
-        "desc": "Set up GitHub Actions for 2 projects."
-      }
-    ],
-    "skillGaps": [
-      {
-        "skill": "Kubernetes Advanced",
-        "score": 32,
-        "color": "#A8C0FF"
-      },
-      {
-        "skill": "Terraform & IaC",
-        "score": 27,
-        "color": "#A855F7"
-      },
-      {
-        "skill": "Monitoring (Grafana)",
-        "score": 44,
-        "color": "#3B82F6"
-      }
-    ],
-    "semesterGoals": [
-      {
-        "id": 1,
-        "text": "Pass CKA Certification",
-        "done": false
-      },
-      {
-        "id": 2,
-        "text": "Internship at a Cloud company",
-        "done": true
-      },
-      {
-        "id": 3,
-        "text": "Setup home lab with Raspberry Pi",
-        "done": false
-      }
-    ],
-    "recentActivity": [
-      {
-        "type": "github",
-        "title": "Updated Dockerfile for Node app",
-        "date": "3h ago",
-        "icon": "⬛"
-      },
-      {
-        "type": "skillrack",
-        "title": "Completed Linux Admin challenge",
-        "date": "Yesterday",
-        "icon": "🟢"
-      }
-    ]
+    "githubUsername": "yogesh-codes",
+    "leetcodeRank": 1500,
+    "leetcodeStreak": 15,
+    "skillrackStreak": 10,
+    "githubStreak": 25,
+    "totalXP": 3200,
+    "level": 14,
+    "badges": [],
+    "skillGaps": [],
+    "semesterGoals": [],
+    "recentActivity": []
   },
   {
     "id": "STU004",
-    "name": "Sneha Patel",
-    "email": "sneha.patel@bits-pilani.ac.in",
-    "regNo": "2021A7PS1234G",
-    "college": "BITS Pilani",
-    "department": "Electronics & Communication",
-    "year": 3,
-    "semester": 5,
-    "section": "C",
-    "cgpa": 8.9,
-    "careerTarget": "Data Scientist",
-    "careerProbability": 65,
-    "joinedDate": "2022-07-20",
-    "attendance": 91,
-    "projectsCompleted": 4,
-    "internships": 1,
-    "githubUsername": "sneha-data",
-    "leetcodeRank": 1850,
-    "leetcodeStreak": 18,
-    "skillrackStreak": 12,
-    "githubStreak": 22,
-    "totalXP": 3200,
-    "level": 15,
-    "badges": [
-      {
-        "title": "Data Wizard",
-        "color": "#A855F7",
-        "date": "Feb 2025",
-        "desc": "Built 3 ML pipelines from scratch."
-      },
-      {
-        "title": "Kaggle Explorer",
-        "color": "#FFD700",
-        "date": "Dec 2024",
-        "desc": "Top 15% in a Kaggle competition."
-      }
-    ],
-    "skillGaps": [
-      {
-        "skill": "Deep Learning (PyTorch)",
-        "score": 48,
-        "color": "#A8C0FF"
-      },
-      {
-        "skill": "MLOps & Model Deployment",
-        "score": 35,
-        "color": "#A855F7"
-      }
-    ],
-    "semesterGoals": [
-      {
-        "id": 1,
-        "text": "Complete Deep Learning Specialization",
-        "done": false
-      },
-      {
-        "id": 2,
-        "text": "Publish a Kaggle notebook with 50+ votes",
-        "done": false
-      }
-    ],
-    "recentActivity": [
-      {
-        "type": "leetcode",
-        "title": "Solved 3 Array problems",
-        "date": "4h ago",
-        "icon": "🔶"
-      },
-      {
-        "type": "github",
-        "title": "Pushed EDA notebook for housing dataset",
-        "date": "Yesterday",
-        "icon": "⬛"
-      }
-    ]
+    "name": "Vimal",
+    "email": "vimal@rit.edu.in",
+    "regNo": "2117240020402",
+    "college": "Rajalakshmi institute of technology",
+    "department": "CSE",
+    "year": 2,
+    "semester": 4,
+    "section": "A",
+    "cgpa": 8.2,
+    "careerTarget": "DevOps Engineer",
+    "careerProbability": 60,
+    "joinedDate": "2023-08-01",
+    "attendance": 85,
+    "projectsCompleted": 3,
+    "internships": 0,
+    "githubUsername": "vimal-ops",
+    "leetcodeRank": 3000,
+    "leetcodeStreak": 5,
+    "skillrackStreak": 4,
+    "githubStreak": 10,
+    "totalXP": 1500,
+    "level": 8,
+    "badges": [],
+    "skillGaps": [],
+    "semesterGoals": [],
+    "recentActivity": []
   },
   {
     "id": "STU005",
-    "name": "Rahul Kumar",
-    "email": "rahul.kumar@srmist.edu.in",
-    "regNo": "RA2111003010005",
-    "college": "SRM Institute of Science and Technology",
-    "department": "Computer SciencComputer Science & Engineeringe & Engineering",
-    "year": 122,
-    "semester": 133,
-    "section": "A",
-    "cgpa": 7.979,
+    "name": "Tarun",
+    "email": "tarun@rit.edu.in",
+    "regNo": "2117240020403",
+    "college": "Rajalakshmi institute of technology",
+    "department": "CSE",
+    "year": 2,
+    "semester": 4,
+    "section": "B",
+    "cgpa": 9.4,
     "careerTarget": "AI Engineer",
-    "attendance": 808585,
-    "projectsCompleted": 2,
-    "internships": 0,
-    "githubUsername": "rahul-devrahul-dev",
-    "leetcodeRank": 5000,
-    "careerProbability": 50,
-    "joinedDate": "2026-03-08",
-    "leetcodeStreak": 0,
-    "skillrackStreak": 0,
-    "githubStreak": 0,
-    "totalXP": 100,
-    "level": 1,
+    "careerProbability": 82,
+    "joinedDate": "2023-08-01",
+    "attendance": 95,
+    "projectsCompleted": 6,
+    "internships": 2,
+    "githubUsername": "tarun-ai",
+    "leetcodeRank": 800,
+    "leetcodeStreak": 30,
+    "skillrackStreak": 25,
+    "githubStreak": 50,
+    "totalXP": 5400,
+    "level": 22,
     "badges": [],
     "skillGaps": [],
     "semesterGoals": [],
@@ -393,31 +152,83 @@
   },
   {
     "id": "STU006",
-    "name": "Udhayan Samy vel",
-    "email": "udhayansamy395@rit.edu.in",
-    "regNo": "2117240020395",
+    "name": "Thiruchelvam",
+    "email": "thiru@rit.edu.in",
+    "regNo": "2117240020404",
     "college": "Rajalakshmi institute of technology",
-    "department": "CSE ",
+    "department": "CSE",
     "year": 2,
     "semester": 4,
-    "section": "A",
-    "cgpa": 8.4,
-    "careerTarget": "AI Engineer",
+    "section": "B",
+    "cgpa": 7.9,
+    "careerTarget": "Cybersecurity Expert",
+    "careerProbability": 55,
+    "joinedDate": "2023-08-01",
     "attendance": 80,
-    "projectsCompleted": 5,
-    "internships": 2,
-    "githubUsername": "Udhay-345",
-    "leetcodeRank": 5000,
-    "careerProbability": 50,
-    "joinedDate": "2026-03-08",
-    "leetcodeStreak": 0,
-    "skillrackStreak": 0,
-    "githubStreak": 0,
-    "totalXP": 100,
-    "level": 1,
+    "projectsCompleted": 2,
+    "internships": 0,
+    "githubUsername": "thiru-sec",
+    "leetcodeRank": 4500,
+    "leetcodeStreak": 2,
+    "skillrackStreak": 5,
+    "githubStreak": 8,
+    "totalXP": 1200,
+    "level": 6,
     "badges": [],
     "skillGaps": [],
     "semesterGoals": [],
     "recentActivity": []
-  }
+  },
+  {
+    "id": "STU007",
+    "name": "Venkatesh",
+    "email": "venky@rit.edu.in",
+    "regNo": "2117240020405",
+    "college": "Rajalakshmi institute of technology",
+    "department": "CSE",
+    "year": 2,
+    "semester": 4,
+    "section": "A",
+    "cgpa": 8.5,
+    "careerTarget": "Data Scientist",
+    "careerProbability": 70,
+    "joinedDate": "2023-08-01",
+    "attendance": 88,
+    "projectsCompleted": 4,
+    "internships": 1,
+    "githubUsername": "venky-data",
+    "leetcodeRank": 1800,
+    "leetcodeStreak": 12,
+    "skillrackStreak": 15,
+    "githubStreak": 20,
+    "totalXP": 3100,
+    "level": 14,
+    "badges": [],
+    "skillGaps": [],
+    "semesterGoals": [],
+    "recentActivity": []
+  },
+  { "id": "STU008", "name": "Aditya Balaji", "email": "aditya.b@rit.edu.in", "regNo": "RA2111001", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 8.8, "careerTarget": "AI Engineer", "careerProbability": 75, "joinedDate": "2023-08-01", "attendance": 92, "projectsCompleted": 5, "internships": 1, "githubUsername": "aditya-b", "leetcodeRank": 1200, "leetcodeStreak": 25, "skillrackStreak": 20, "githubStreak": 40, "totalXP": 4500, "level": 18, "badges": [], "recentActivity": [] },
+  { "id": "STU009", "name": "Bhavana Jay", "email": "bhavana.j@rit.edu.in", "regNo": "RA2111002", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 9.2, "careerTarget": "Data Scientist", "careerProbability": 80, "joinedDate": "2023-08-01", "attendance": 94, "projectsCompleted": 6, "internships": 2, "githubUsername": "bhavana-j", "leetcodeRank": 900, "leetcodeStreak": 35, "skillrackStreak": 30, "githubStreak": 55, "totalXP": 5800, "level": 23, "badges": [], "recentActivity": [] },
+  { "id": "STU010", "name": "Charan Teja", "email": "charan.t@rit.edu.in", "regNo": "RA2111003", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "C", "cgpa": 7.5, "careerTarget": "Full Stack Developer", "careerProbability": 52, "joinedDate": "2023-08-01", "attendance": 78, "projectsCompleted": 2, "internships": 0, "githubUsername": "charan-t", "leetcodeRank": 4000, "leetcodeStreak": 3, "skillrackStreak": 6, "githubStreak": 10, "totalXP": 1400, "level": 7, "badges": [], "recentActivity": [] },
+  { "id": "STU011", "name": "Deepika Ram", "email": "deepika.r@rit.edu.in", "regNo": "RA2111004", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 8.4, "careerTarget": "Cloud Architect", "careerProbability": 66, "joinedDate": "2023-08-01", "attendance": 86, "projectsCompleted": 4, "internships": 1, "githubUsername": "deepika-r", "leetcodeRank": 2200, "leetcodeStreak": 14, "skillrackStreak": 12, "githubStreak": 18, "totalXP": 2800, "level": 13, "badges": [], "recentActivity": [] },
+  { "id": "STU012", "name": "Eswar Rao", "email": "eswar.r@rit.edu.in", "regNo": "RA2111005", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 8.0, "careerTarget": "DevOps Engineer", "careerProbability": 58, "joinedDate": "2023-08-01", "attendance": 82, "projectsCompleted": 3, "internships": 0, "githubUsername": "eswar-r", "leetcodeRank": 3200, "leetcodeStreak": 8, "skillrackStreak": 5, "githubStreak": 12, "totalXP": 1700, "level": 9, "badges": [], "recentActivity": [] },
+  { "id": "STU013", "name": "Fahad Khan", "email": "fahad.k@rit.edu.in", "regNo": "RA2111006", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "C", "cgpa": 9.5, "careerTarget": "AI Engineer", "careerProbability": 88, "joinedDate": "2023-08-01", "attendance": 97, "projectsCompleted": 8, "internships": 3, "githubUsername": "fahad-k", "leetcodeRank": 450, "leetcodeStreak": 45, "skillrackStreak": 40, "githubStreak": 70, "totalXP": 7200, "level": 28, "badges": [], "recentActivity": [] },
+  { "id": "STU014", "name": "Gokul Raj", "email": "gokul.r@rit.edu.in", "regNo": "RA2111007", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 7.2, "careerTarget": "Full Stack Developer", "careerProbability": 45, "joinedDate": "2023-08-01", "attendance": 75, "projectsCompleted": 2, "internships": 0, "githubUsername": "gokul-r", "leetcodeRank": 5500, "leetcodeStreak": 1, "skillrackStreak": 2, "githubStreak": 5, "totalXP": 900, "level": 4, "badges": [], "recentActivity": [] },
+  { "id": "STU015", "name": "Harini Murugan", "email": "harini.m@rit.edu.in", "regNo": "RA2111008", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 8.9, "careerTarget": "Data Scientist", "careerProbability": 78, "joinedDate": "2023-08-01", "attendance": 91, "projectsCompleted": 5, "internships": 1, "githubUsername": "harini-m", "leetcodeRank": 1400, "leetcodeStreak": 20, "skillrackStreak": 18, "githubStreak": 35, "totalXP": 4200, "level": 17, "badges": [], "recentActivity": [] },
+  { "id": "STU016", "name": "Ishaan Das", "email": "ishaan.d@rit.edu.in", "regNo": "RA2111009", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "C", "cgpa": 8.1, "careerTarget": "Cybersecurity Expert", "careerProbability": 62, "joinedDate": "2023-08-01", "attendance": 84, "projectsCompleted": 3, "internships": 0, "githubUsername": "ishaan-d", "leetcodeRank": 2800, "leetcodeStreak": 10, "skillrackStreak": 8, "githubStreak": 15, "totalXP": 2300, "level": 11, "badges": [], "recentActivity": [] },
+  { "id": "STU017", "name": "Janani S", "email": "janani.s@rit.edu.in", "regNo": "RA2111010", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 9.0, "careerTarget": "AI Engineer", "careerProbability": 79, "joinedDate": "2023-08-01", "attendance": 93, "projectsCompleted": 6, "internships": 2, "githubUsername": "janani-s", "leetcodeRank": 1100, "leetcodeStreak": 28, "skillrackStreak": 22, "githubStreak": 42, "totalXP": 4900, "level": 20, "badges": [], "recentActivity": [] },
+  { "id": "STU018", "name": "Kiran Kumar", "email": "kiran.k@rit.edu.in", "regNo": "RA2111011", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 7.8, "careerTarget": "Full Stack Developer", "careerProbability": 55, "joinedDate": "2023-08-01", "attendance": 81, "projectsCompleted": 3, "internships": 0, "githubUsername": "kiran-k", "leetcodeRank": 3500, "leetcodeStreak": 6, "skillrackStreak": 4, "githubStreak": 11, "totalXP": 1600, "level": 8, "badges": [], "recentActivity": [] },
+  { "id": "STU019", "name": "Lavanya R", "email": "lavanya.r@rit.edu.in", "regNo": "RA2111012", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "C", "cgpa": 8.6, "careerTarget": "Cloud Architect", "careerProbability": 72, "joinedDate": "2023-08-01", "attendance": 89, "projectsCompleted": 4, "internships": 1, "githubUsername": "lavanya-r", "leetcodeRank": 1600, "leetcodeStreak": 18, "skillrackStreak": 14, "githubStreak": 28, "totalXP": 3500, "level": 15, "badges": [], "recentActivity": [] },
+  { "id": "STU020", "name": "Manoj Mani", "email": "manoj.m@rit.edu.in", "regNo": "RA2111013", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 8.3, "careerTarget": "DevOps Engineer", "careerProbability": 64, "joinedDate": "2023-08-01", "attendance": 85, "projectsCompleted": 4, "internships": 0, "githubUsername": "manoj-m", "leetcodeRank": 2500, "leetcodeStreak": 12, "skillrackStreak": 9, "githubStreak": 16, "totalXP": 2500, "level": 12, "badges": [], "recentActivity": [] },
+  { "id": "STU021", "name": "Naveen Raj", "email": "naveen.r@rit.edu.in", "regNo": "RA2111014", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 7.4, "careerTarget": "Cybersecurity Expert", "careerProbability": 48, "joinedDate": "2023-08-01", "attendance": 76, "projectsCompleted": 2, "internships": 0, "githubUsername": "naveen-r", "leetcodeRank": 5000, "leetcodeStreak": 2, "skillrackStreak": 5, "githubStreak": 7, "totalXP": 1100, "level": 5, "badges": [], "recentActivity": [] },
+  { "id": "STU022", "name": "Oviya K", "email": "oviya.k@rit.edu.in", "regNo": "RA2111015", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "C", "cgpa": 9.3, "careerTarget": "AI Engineer", "careerProbability": 84, "joinedDate": "2023-08-01", "attendance": 96, "projectsCompleted": 7, "internships": 2, "githubUsername": "oviya-k", "leetcodeRank": 600, "leetcodeStreak": 40, "skillrackStreak": 35, "githubStreak": 60, "totalXP": 6500, "level": 26, "badges": [], "recentActivity": [] },
+  { "id": "STU023", "name": "Prakash G", "email": "prakash.g@rit.edu.in", "regNo": "RA2111016", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 8.7, "careerTarget": "Data Scientist", "careerProbability": 76, "joinedDate": "2023-08-01", "attendance": 91, "projectsCompleted": 5, "internships": 1, "githubUsername": "prakash-g", "leetcodeRank": 1300, "leetcodeStreak": 22, "skillrackStreak": 16, "githubStreak": 32, "totalXP": 4000, "level": 16, "badges": [], "recentActivity": [] },
+  { "id": "STU024", "name": "Qadir Ali", "email": "qadir.a@rit.edu.in", "regNo": "RA2111017", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 8.2, "careerTarget": "Full Stack Developer", "careerProbability": 63, "joinedDate": "2023-08-01", "attendance": 84, "projectsCompleted": 3, "internships": 0, "githubUsername": "qadir-a", "leetcodeRank": 2800, "leetcodeStreak": 10, "skillrackStreak": 8, "githubStreak": 15, "totalXP": 2400, "level": 12, "badges": [], "recentActivity": [] },
+  { "id": "STU025", "name": "Riya Sharma", "email": "riya.s@rit.edu.in", "regNo": "RA2111018", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "C", "cgpa": 8.5, "careerTarget": "Cloud Architect", "careerProbability": 70, "joinedDate": "2023-08-01", "attendance": 88, "projectsCompleted": 4, "internships": 1, "githubUsername": "riya-s", "leetcodeRank": 1700, "leetcodeStreak": 16, "skillrackStreak": 13, "githubStreak": 26, "totalXP": 3300, "level": 14, "badges": [], "recentActivity": [] },
+  { "id": "STU026", "name": "Sanjay Rao", "email": "sanjay.r@rit.edu.in", "regNo": "RA2111019", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 7.9, "careerTarget": "DevOps Engineer", "careerProbability": 56, "joinedDate": "2023-08-01", "attendance": 82, "projectsCompleted": 3, "internships": 0, "githubUsername": "sanjay-r", "leetcodeRank": 3400, "leetcodeStreak": 7, "skillrackStreak": 5, "githubStreak": 12, "totalXP": 1600, "level": 8, "badges": [], "recentActivity": [] },
+  { "id": "STU027", "name": "Tulsi Devi", "email": "tulsi.d@rit.edu.in", "regNo": "RA2111020", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 9.1, "careerTarget": "AI Engineer", "careerProbability": 82, "joinedDate": "2023-08-01", "attendance": 95, "projectsCompleted": 6, "internships": 2, "githubUsername": "tulsi-d", "leetcodeRank": 750, "leetcodeStreak": 35, "skillrackStreak": 30, "githubStreak": 55, "totalXP": 6000, "level": 24, "badges": [], "recentActivity": [] },
+  { "id": "STU028", "name": "Umar Farooq", "email": "umar.f@rit.edu.in", "regNo": "RA2111021", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "C", "cgpa": 8.0, "careerTarget": "Data Scientist", "careerProbability": 58, "joinedDate": "2023-08-01", "attendance": 83, "projectsCompleted": 3, "internships": 0, "githubUsername": "umar-f", "leetcodeRank": 3100, "leetcodeStreak": 8, "skillrackStreak": 6, "githubStreak": 14, "totalXP": 1800, "level": 9, "badges": [], "recentActivity": [] },
+  { "id": "STU029", "name": "Vaishali K", "email": "vaishali.k@rit.edu.in", "regNo": "RA2111022", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "A", "cgpa": 8.8, "careerTarget": "Full Stack Developer", "careerProbability": 74, "joinedDate": "2023-08-01", "attendance": 92, "projectsCompleted": 5, "internships": 1, "githubUsername": "vaishali-k", "leetcodeRank": 1450, "leetcodeStreak": 21, "skillrackStreak": 17, "githubStreak": 33, "totalXP": 4100, "level": 17, "badges": [], "recentActivity": [] },
+  { "id": "STU030", "name": "Wilson Raj", "email": "wilson.r@rit.edu.in", "regNo": "RA2111023", "college": "Rajalakshmi institute of technology", "department": "CSE", "year": 2, "semester": 4, "section": "B", "cgpa": 7.6, "careerTarget": "Cybersecurity Expert", "careerProbability": 50, "joinedDate": "2023-08-01", "attendance": 79, "projectsCompleted": 2, "internships": 0, "githubUsername": "wilson-r", "leetcodeRank": 4200, "leetcodeStreak": 4, "skillrackStreak": 6, "githubStreak": 9, "totalXP": 1300, "level": 6, "badges": [], "recentActivity": [] }
 ]

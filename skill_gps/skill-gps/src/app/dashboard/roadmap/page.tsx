@@ -334,7 +334,7 @@ export default function RoadmapPage() {
                         >
                             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
                                 <div style={{ width: 50, height: 50, borderRadius: 12, background: "rgba(168,192,255,0.1)", color: "#A8C0FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    {selectedNode.icon}
+                                    {selectedNode.icon || <BookOpen size={24} />}
                                 </div>
                                 <div>
                                     <h2 style={{ fontSize: "1.6rem", color: "var(--text-primary)", margin: 0 }}>{selectedNode.title}</h2>

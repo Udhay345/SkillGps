@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 async function testModel() {
-    const GEMINI_API_KEY = 'AIzaSyALMbozoDpP1QmoAauPrHKtNbDLGIHrRY8';
+    const GEMINI_API_KEY = 'YOURAPIKEY';
     try {
         console.log('Testing gemini-flash-latest...');
         const response = await axios.post(

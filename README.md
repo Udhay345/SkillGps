@@ -8,7 +8,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20App-6366f1?style=for-the-badge&logo=vercel)](https://github.com/Udhay345/SkillGps)
 [![GitHub Stars](https://img.shields.io/github/stars/Udhay345/SkillGps?style=for-the-badge&color=f59e0b)](https://github.com/Udhay345/SkillGps/stargazers)
-[![License](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
+
 
 </div>
 
@@ -249,10 +249,6 @@ Contributions are welcome! Please follow these steps:
 4. Push and open a Pull Request
 
 ---
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ---
 

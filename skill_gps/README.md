@@ -2,7 +2,6 @@
 
 **Skill GPS** is a comprehensive student management and AI-powered career mentoring platform. It provides personalized roadmaps, skill gap analysis, AI-driven career counseling, aptitude training, and communication coaching — all tailored for placement-ready university students.
 
-> 🌐 **Live Demo:** _[Link to your deployed app]_
 > 
 > ⚠️ **Note for contributors:** API keys are required to run AI features locally. See setup instructions below.
 

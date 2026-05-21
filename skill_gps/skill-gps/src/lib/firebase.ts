@@ -6,13 +6,13 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCC0T_dKNSWvILxlkf5Ef4L6A8JwTwPV0I",
-  authDomain: "skillgps-e2f75.firebaseapp.com",
-  projectId: "skillgps-e2f75",
-  storageBucket: "skillgps-e2f75.firebasestorage.app",
-  messagingSenderId: "208360142427",
-  appId: "1:208360142427:web:ea3f9f5d28926444d2317e",
-  measurementId: "G-SWX8ZN6P81"
+  apiKey: "YOURAPIKEY",
+  authDomain: "YOURAUTHDOMAIN",
+  projectId: "YOURPROJECTID",
+  storageBucket: "XXXXXX-XXXX.XXXXXXX.app",
+  messagingSenderId: "XXXXXXXX",
+  appId: "XXXXXXXXXXXXXXXXXXX",
+  measurementId: "XXXXXXXXX"
 };
 
 // Initialize Firebase using singleton pattern to prevent re-initialization in Next.js

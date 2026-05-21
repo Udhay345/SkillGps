@@ -224,5 +224,12 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
----
+## 📄 License
 
+This project is licensed under a **Non-Commercial License**.
+
+> ⚠️ **Commercial use of this software is strictly prohibited.**
+> You may use, modify, and distribute this software for personal, educational, or research purposes only.
+> Any commercial use — including selling, sublicensing, or integrating this software into a paid product or service — is **not permitted** without explicit written consent from the author.
+
+See the [LICENSE](./LICENSE) file for full terms.

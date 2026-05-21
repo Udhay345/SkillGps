@@ -88,43 +88,17 @@ By combining **Machine Learning (ML)** and **Natural Language Processing (NLP)**
 </tr>
 </table>
 
----
 
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT LAYER                             │
-│                     React.js Frontend                           │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ REST / WebSocket
-          ┌──────────────────┼──────────────────┐
-          ▼                  ▼                  ▼
-┌─────────────────┐  ┌──────────────┐  ┌───────────────────┐
-│  Spring Boot    │  │  FastAPI     │  │  Speech Service   │
-│  Core API       │  │  ML Engine   │  │  (Whisper/Vosk)   │
-│  (Java)         │  │  (Python)    │  │  (Python)         │
-└────────┬────────┘  └──────┬───────┘  └────────┬──────────┘
-         │                  │                   │
-         ▼                  ▼                   ▼
-┌─────────────────┐  ┌──────────────────────────────────────┐
-│     MySQL       │  │         AI / LLM APIs                │
-│   Database      │  │  Groq · HuggingFace · OpenAI         │
-└─────────────────┘  └──────────────────────────────────────┘
-```
-
----
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology | Purpose |
 |---|---|---|
 | **Frontend** | React.js | Interactive UI & dashboards |
-| **Backend** | Spring Boot (Java) | Core REST API & business logic |
-| **Database** | MySQL | Persistent student & academic data |
+| **Backend and Database** | Cloud Firebase |  API & business logic |
 | **ML Engine** | Python · FastAPI · Scikit-learn | Predictive models & skill analysis |
-| **NLP / LLM** | Groq · HuggingFace · OpenAI | AI roadmap generation & feedback |
-| **Speech** | Whisper · Vosk | Communication lab transcription |
+| **NLP / LLM** | Groq  | AI roadmap generation, Chatbot & feedback |
+
 
 ---
 
@@ -252,10 +226,3 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-<div align="center">
-
-Built with ❤️ by [Udhay](https://github.com/Udhay345) and contributors
-
-⭐ Star this repo if Skill GPS helped you!
-
-</div>
